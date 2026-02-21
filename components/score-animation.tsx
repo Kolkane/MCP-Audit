@@ -9,21 +9,24 @@ export function ScoreAnimation() {
   const width = useTransform(bar, (value) => `${Math.max(0, Math.min(100, value))}%`);
 
   useEffect(() => {
-    let start = 0;
     const end = 23;
     const duration = 1500;
-    const step = 16;
-    const timer = setInterval(() => {
-      start += step;
-      const progress = Math.min(start / duration, 1);
+    let rafId: number;
+    let startTime: number | null = null;
+
+    const tick = (timestamp: number) => {
+      if (startTime === null) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
       const value = Math.round(end * progress);
       setScore(value);
       bar.set(value);
-      if (progress >= 1) {
-        clearInterval(timer);
+      if (progress < 1) {
+        rafId = requestAnimationFrame(tick);
       }
-    }, step);
-    return () => clearInterval(timer);
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
   }, [bar]);
 
   return (

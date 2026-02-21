@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Check, Quote, Sparkles, Star, X } from "lucide-react";
+import { ArrowRight, Briefcase, Building2, Check, Quote, ShoppingBag, Sparkles, Star, Stethoscope, User, Wrench, X } from "lucide-react";
 import { FadeIn } from "@/components/fade-in";
 import { ScoreAnimation } from "@/components/score-animation";
 import { AuditForm } from "@/components/audit-form";
@@ -32,12 +32,12 @@ const steps = [
 ];
 
 const personas = [
-  { label: "Freelances", benefit: "Sois recommandé avant tes concurrents", icon: "user" },
-  { label: "Agences", benefit: "Proposez l'audit en offre additionnelle", icon: "briefcase" },
-  { label: "PME-TPE", benefit: "Capturez les clients IA", icon: "buildings" },
-  { label: "Artisans", benefit: "Trouvez des clients sans SEO", icon: "hammer" },
-  { label: "Professions libérales", benefit: "Patients et clients vous trouvent", icon: "stethoscope" },
-  { label: "E-commerce", benefit: "Vos produits lus par les IA", icon: "shopping-bag" }
+  { label: "Freelances", benefit: "Sois recommandé avant tes concurrents", icon: User },
+  { label: "Agences", benefit: "Proposez l'audit en offre additionnelle", icon: Building2 },
+  { label: "PME-TPE", benefit: "Capturez les clients IA", icon: Briefcase },
+  { label: "Artisans", benefit: "Soyez trouvés même sans SEO avancé", icon: Wrench },
+  { label: "Professions libérales", benefit: "Patients et clients vous trouvent", icon: Stethoscope },
+  { label: "E-commerce", benefit: "Vos produits lus par les agents IA", icon: ShoppingBag }
 ];
 
 const pricing = [
@@ -255,16 +255,19 @@ export default function Page() {
       <section className="section bg-surface" id="personas">
         <div className="mx-auto max-w-6xl px-6">
           <FadeIn>
-            <div className="grid gap-5 md:grid-cols-3">
-              {personas.map((persona) => (
-                <div key={persona.label} className="rounded-2xl border border-border bg-white p-6 text-center shadow-sm">
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#EEF2FF] text-accent">
-                    <Sparkles className="h-5 w-5" />
+            <div className="mt-8 grid gap-5 md:grid-cols-3">
+              {personas.map((persona) => {
+                const Icon = persona.icon;
+                return (
+                  <div key={persona.label} className="rounded-2xl border border-border bg-white p-6 text-center shadow-sm">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#EEF2FF] text-accent">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <h3 className="mt-4 text-lg font-semibold text-night">{persona.label}</h3>
+                    <p className="mt-2 text-sm text-slate">{persona.benefit}</p>
                   </div>
-                  <h3 className="mt-4 text-lg font-semibold text-night">{persona.label}</h3>
-                  <p className="mt-2 text-sm text-slate">{persona.benefit}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
             <div className="mt-8 flex items-center justify-center gap-3">
               <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-white">Si vous avez un site</span>
@@ -403,7 +406,7 @@ export default function Page() {
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-base font-semibold text-white">Agentable</p>
-            <p>SIRET [A_REMPLACER] · Service 100% français 🇫🇷</p>
+            <p>Jungle.Block Solutions · SIRET 99521609000010 · Service 100% français 🇫🇷</p>
             <p>© 2025 Agentable — Tous droits réservés</p>
           </div>
           <div className="flex flex-wrap gap-6 text-sm">
