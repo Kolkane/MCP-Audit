@@ -1,14 +1,27 @@
 import Link from "next/link";
-import { ArrowRight, Check, Sparkles, Star } from "lucide-react";
-import { ScoreAnimation } from "@/components/score-animation";
+import { ArrowRight, Check, Quote, Sparkles, Star, X } from "lucide-react";
 import { FadeIn } from "@/components/fade-in";
+import { ScoreAnimation } from "@/components/score-animation";
 import { AuditForm } from "@/components/audit-form";
 import { CheckoutButton } from "@/components/checkout-button";
+import { Navbar } from "@/components/navbar";
 
 const problemPoints = [
-  "Un client cherche votre service sur ChatGPT → vous n'apparaissez pas",
-  "Vos données sont illisibles par les agents IA",
-  "Vos concurrents prennent votre place sans le savoir"
+  {
+    title: "Invisible sur ChatGPT",
+    description: "Un client demande un prestataire → tes concurrents sortent, toi non.",
+    icon: "ghost"
+  },
+  {
+    title: "Données illisibles",
+    description: "Les agents IA ne comprennent pas tes services ni tes offres.",
+    icon: "database"
+  },
+  {
+    title: "Parts de marché perdues",
+    description: "Chaque requête IA devient un lead confié à quelqu'un d'autre.",
+    icon: "users"
+  }
 ];
 
 const steps = [
@@ -18,12 +31,19 @@ const steps = [
   "Notre agent corrige et optimise votre visibilité IA automatiquement"
 ];
 
-const personas = ["Freelances", "Agences", "PME-TPE", "Artisans", "Professions libérales", "E-commerce"];
+const personas = [
+  { label: "Freelances", benefit: "Sois recommandé avant tes concurrents", icon: "user" },
+  { label: "Agences", benefit: "Proposez l'audit en offre additionnelle", icon: "briefcase" },
+  { label: "PME-TPE", benefit: "Capturez les clients IA", icon: "buildings" },
+  { label: "Artisans", benefit: "Trouvez des clients sans SEO", icon: "hammer" },
+  { label: "Professions libérales", benefit: "Patients et clients vous trouvent", icon: "stethoscope" },
+  { label: "E-commerce", benefit: "Vos produits lus par les IA", icon: "shopping-bag" }
+];
 
 const pricing = [
   {
     name: "Starter",
-    price: "490€ HT",
+    price: "490€",
     cadence: "one-shot",
     features: [
       "Structuration données",
@@ -35,11 +55,11 @@ const pricing = [
   },
   {
     name: "Pro",
-    price: "790€ HT",
+    price: "790€",
     cadence: "one-shot",
     features: [
       "Tout Starter inclus",
-      "Endpoint MCP complet + API key privée",
+      "Endpoint MCP complet + API key",
       "Optimisation schema.org + métadonnées IA",
       "Score garanti >80/100"
     ],
@@ -48,107 +68,121 @@ const pricing = [
   },
   {
     name: "Maintenance",
-    price: "79€ HT",
+    price: "79€",
     cadence: "/mois",
     features: [
-      "Monitoring visibilité IA mensuel",
+      "Monitoring visibilité IA",
       "Mises à jour automatiques",
-      "Alertes si score baisse",
+      "Alertes score",
       "Rapport mensuel"
     ],
     priceKey: "maintenance" as const,
-    note: "Inclus avec tout pack la 1ère année"
+    note: "Inclus 1 an"
   }
 ];
 
 const testimonials = [
   {
-    label: "Freelance UX designer — Paris",
+    label: "Freelance UX · Paris",
     delta: "12 → 81",
     quote: "J'apparais maintenant quand on cherche un designer sur Perplexity."
   },
   {
-    label: "Agence immobilière — Bordeaux",
+    label: "Agence immo · Bordeaux",
     delta: "19 → 74",
-    quote: "3 nouveaux mandats en 6 semaines."
+    quote: "3 nouveaux mandats signés en 6 semaines grâce aux recommandations IA."
   },
   {
-    label: "Cabinet dentaire — Lyon",
+    label: "Cabinet dentaire · Lyon",
     delta: "22 → 68",
-    quote: "Mes nouveaux patients me disent qu'une IA les a orientés vers moi."
+    quote: "Mes nouveaux patients me citent ChatGPT comme source."
   }
 ];
 
 const faq = [
   {
     question: "C'est vraiment gratuit l'audit ?",
-    answer: "Oui. Le rapport PDF et le score Agent-Readiness sont offerts. Aucun moyen de paiement demandé."
+    answer: "Oui. Score Agent-Readiness + rapport PDF détaillé. Aucun moyen de paiement demandé."
   },
   {
     question: "Combien de temps prend l'audit ?",
-    answer: "24h maximum. Ton rapport part directement dans ta boîte mail pro."
+    answer: "24h chrono. Notre agent te livre le rapport directement par email pro."
   },
   {
-    question: "Que contient le rapport exactement ?",
-    answer: "Score détaillé, erreurs détectées, données illisibles pour les IA, estimation business perdue et plan d'action."
+    question: "Que contient le rapport ?",
+    answer: "Score détaillé, lacunes techniques, estimation business perdu et plan d'action."
   },
   {
     question: "Comment fonctionne la mise en conformité automatique ?",
-    answer: "Notre agent IA génère un endpoint MCP + métadonnées adaptées, pousse les correctifs et vérifie le nouveau score."
+    answer: "Nos agents IA génèrent et testent un endpoint MCP + métadonnées optimisées pour les agents."
   },
   {
-    question: "Sous quel délai mon score s'améliore-t-il ?",
-    answer: "48h pour tout pack payé. Tu reçois un rapport de conformité + nouvelle note garantie."
+    question: "Sous quel délai mon score s'améliore ?",
+    answer: "48h pour tout pack Starter ou Pro : tu reçois le rapport final avec la nouvelle note garantie."
   },
   {
     question: "Ça fonctionne pour mon secteur ?",
-    answer: "Si tu as un site web, oui. Nous couvrons les secteurs listés et tous les sites compatibles schema.org."
+    answer: "Si tu as un site, oui. Nous couvrons freelances, agences, PME, e-commerce, artisans et professions libérales."
   }
 ];
 
-const calendlyUrl = process.env.CALENDLY_URL || "#";
+const calendlyUrl = process.env.NEXT_PUBLIC_CALENDLY_URL || "https://calendly.com/agentable/demo";
 
 export default function Page() {
   return (
-    <main className="bg-background">
+    <main className="bg-background text-night">
+      <Navbar />
       {/* HERO */}
-      <section id="hero" className="mx-auto max-w-6xl px-6 pb-16 pt-20 md:pt-32">
-        <FadeIn>
-          <p className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-xs text-white/60">
-            <Sparkles className="h-4 w-4 text-accent" /> Agentable · Audit IA obligatoire en 2025
-          </p>
-          <div className="mt-6 grid gap-10 lg:grid-cols-2 lg:items-center">
-            <div>
-              <h1 className="text-3xl font-semibold leading-tight text-white md:text-5xl">
-                Votre site existe sur Google. Mais existe-t-il pour ChatGPT, Perplexity et les agents IA qui recommandent vos concurrents à vos futurs clients ?
+      <section id="hero" className="relative bg-gradient-to-br from-white to-[#EEF2FF] pt-32">
+        <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 lg:flex-row lg:items-center">
+          <FadeIn>
+            <div className="text-center lg:text-left">
+              <span className="inline-flex items-center gap-2 rounded-full bg-surface px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-accent">
+                ✦ Nouveau — Visibilité IA pour tous les sites
+              </span>
+              <h1 className="mt-6 text-4xl font-bold leading-tight text-night md:text-6xl">
+                Votre site existe sur Google. Mais existe-t-il pour ChatGPT, Perplexity et les agents IA ?
               </h1>
-              <p className="mt-6 text-lg text-white/80">
-                Découvrez votre score de visibilité IA gratuitement en 24h. Sans engagement.
+              <p className="mx-auto mt-6 max-w-2xl text-lg text-slate">
+                Obtenez votre score de visibilité IA gratuitement en 24h, puis laissez notre agent corriger vos données pour monopoliser les recommandations IA.
               </p>
-              <div className="mt-8 flex flex-wrap gap-4">
-                <a href="#audit" className="inline-flex items-center gap-2 rounded-2xl bg-accent px-6 py-3 text-base font-semibold text-white transition hover:bg-indigo-400">
+              <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
+                <a
+                  href="#audit"
+                  className="rounded-xl bg-accent px-7 py-4 text-base font-semibold text-white shadow-[0_12px_30px_rgba(99,102,241,0.25)] transition hover:bg-[#4F46E5]"
+                >
                   Obtenir mon audit gratuit
-                  <ArrowRight className="h-4 w-4" />
                 </a>
-                <a href="#pricing" className="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-6 py-3 text-base font-semibold text-white transition hover:border-white">
+                <a
+                  href="#pricing"
+                  className="rounded-xl border border-accent px-7 py-4 text-base font-semibold text-accent transition hover:bg-[#EEF2FF]"
+                >
                   Voir les offres
                 </a>
               </div>
             </div>
-            <ScoreAnimation />
-          </div>
-        </FadeIn>
+          </FadeIn>
+          <FadeIn>
+            <div className="w-full lg:w-auto">
+              <ScoreAnimation />
+            </div>
+          </FadeIn>
+        </div>
       </section>
 
       {/* PROBLEM */}
-      <section className="section border-t border-white/5" id="problem">
+      <section className="section bg-surface" id="problem">
         <div className="mx-auto max-w-6xl px-6">
           <FadeIn>
             <div className="grid gap-6 md:grid-cols-3">
               {problemPoints.map((point, index) => (
-                <div key={point} className="rounded-2xl border border-white/10 bg-white/5 p-6 text-white/80">
-                  <div className="text-sm text-accent">0{index + 1}</div>
-                  <p className="mt-4 text-lg text-white">{point}</p>
+                <div key={point.title} className="relative overflow-hidden rounded-2xl border border-border bg-white p-6 shadow-sm">
+                  <span className="absolute right-4 top-4 text-6xl font-bold text-surface">0{index + 1}</span>
+                  <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[#EEF2FF] text-accent">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+                  <h3 className="mt-6 text-lg font-semibold text-night">{point.title}</h3>
+                  <p className="mt-2 text-sm text-slate">{point.description}</p>
                 </div>
               ))}
             </div>
@@ -156,52 +190,61 @@ export default function Page() {
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
+      {/* PROCESS */}
       <section className="section" id="process">
         <div className="mx-auto max-w-6xl px-6">
           <FadeIn>
-            <div className="space-y-8">
-              <h2 className="text-3xl font-semibold text-white">Comment ça marche</h2>
-              <div className="grid gap-6 md:grid-cols-2">
-                {steps.map((step, index) => (
-                  <div key={step} className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                    <div className="flex items-center gap-3 text-accent">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-full border border-accent/40 text-lg font-semibold">
-                        {index + 1}
-                      </span>
-                      Étape {index + 1}
+            <h2 className="text-3xl font-semibold">Comment ça marche</h2>
+            <div className="mt-10 flex flex-col gap-8 lg:flex-row lg:items-start">
+              {steps.map((step, index) => (
+                <div key={step} className="relative flex-1">
+                  {index < steps.length - 1 && (
+                    <div className="absolute top-6 hidden w-full border-t-2 border-dashed border-accent/30 lg:block" />
+                  )}
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-lg font-semibold text-white">
+                      {index + 1}
                     </div>
-                    <p className="mt-4 text-lg text-white">{step}</p>
+                    <p className="text-base font-medium text-night">{step}</p>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </FadeIn>
         </div>
       </section>
 
-      {/* REPORT EXAMPLE */}
-      <section className="section border-y border-white/5" id="report">
+      {/* REPORT */}
+      <section className="section" id="report">
         <div className="mx-auto max-w-5xl px-6">
           <FadeIn>
-            <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 p-8 text-white">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm text-white/60">Extrait de rapport</p>
-                  <p className="text-4xl font-semibold text-danger">Score 34/100</p>
+            <div className="relative">
+              <div className="absolute inset-0 -rotate-2 rounded-3xl border border-border bg-white opacity-40"></div>
+              <div className="relative rounded-3xl border border-border bg-white p-8 shadow-card">
+                <div className="rounded-2xl bg-accent p-4 text-white">
+                  <p className="text-sm uppercase tracking-[0.3em]">Rapport Agentable — Exemple</p>
+                  <p className="text-4xl font-semibold">Score 34/100</p>
                 </div>
-                <div className="rounded-2xl bg-white/10 px-4 py-2 text-sm text-white/80">Valeur business estimée perdue : 2 400€/mois</div>
-              </div>
-              <ul className="mt-6 space-y-3 text-white/80">
-                <li>• Données produit illisibles par les IA</li>
-                <li>• Aucun endpoint MCP ni schema.org exploitable</li>
-                <li>• Métadonnées obsolètes → score confiance très faible</li>
-              </ul>
-              <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
-                <p className="text-white/70">Corrigez ces points et passez directement en zone verte.</p>
-                <a href="#pricing" className="inline-flex items-center gap-2 text-accent">
-                  Corriger mon score →
-                </a>
+                <div className="mt-6 h-3 w-full rounded-full bg-surface">
+                  <div className="h-full w-1/3 rounded-full bg-danger" />
+                </div>
+                <ul className="mt-6 space-y-3 text-slate">
+                  <li className="flex items-center gap-3 text-base text-danger">
+                    <X className="h-4 w-4" /> Données illisibles par les IA
+                  </li>
+                  <li className="flex items-center gap-3 text-base text-danger">
+                    <X className="h-4 w-4" /> Aucun endpoint MCP exploitable
+                  </li>
+                  <li className="flex items-center gap-3 text-base text-danger">
+                    <X className="h-4 w-4" /> Métadonnées obsolètes → faible confiance
+                  </li>
+                </ul>
+                <div className="mt-6 flex items-center justify-between">
+                  <p className="text-base font-semibold text-success">Valeur perdue estimée : 2 400€/mois</p>
+                  <a href="#pricing" className="rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-white">
+                    Corriger mon score →
+                  </a>
+                </div>
               </div>
             </div>
           </FadeIn>
@@ -209,34 +252,37 @@ export default function Page() {
       </section>
 
       {/* PERSONAS */}
-      <section className="section" id="personas">
+      <section className="section bg-surface" id="personas">
         <div className="mx-auto max-w-6xl px-6">
           <FadeIn>
-            <div className="space-y-4">
-              <p className="text-sm uppercase tracking-[0.3em] text-accent">Pour qui ?</p>
-              <h2 className="text-3xl font-semibold text-white">Si vous avez un site, vous avez besoin d'un score Agentable.</h2>
-            </div>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-5 md:grid-cols-3">
               {personas.map((persona) => (
-                <div key={persona} className="rounded-2xl border border-white/10 bg-white/5 px-6 py-8 text-center text-lg text-white/90">
-                  {persona}
+                <div key={persona.label} className="rounded-2xl border border-border bg-white p-6 text-center shadow-sm">
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#EEF2FF] text-accent">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold text-night">{persona.label}</h3>
+                  <p className="mt-2 text-sm text-slate">{persona.benefit}</p>
                 </div>
               ))}
+            </div>
+            <div className="mt-8 flex items-center justify-center gap-3">
+              <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-white">Si vous avez un site</span>
+              <p className="text-base font-semibold text-night">Vous avez besoin d'un score Agentable.</p>
             </div>
           </FadeIn>
         </div>
       </section>
 
       {/* FORM */}
-      <section className="section border-t border-white/5" id="audit">
-        <div className="mx-auto max-w-4xl px-6">
-          <FadeIn>
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
-              <p className="text-sm uppercase tracking-[0.3em] text-accent">Audit gratuit</p>
-              <h2 className="mt-4 text-3xl font-semibold">Recevez votre score en 24h</h2>
+      <section className="section" id="audit">
+        <div className="mx-auto max-w-5xl rounded-[32px] bg-gradient-to-br from-accent to-accentLight p-1">
+          <div className="rounded-[30px] bg-white p-10">
+            <FadeIn>
+              <h2 className="text-3xl font-semibold text-night">Obtenez votre score gratuit</h2>
               <AuditForm />
-            </div>
-          </FadeIn>
+            </FadeIn>
+          </div>
         </div>
       </section>
 
@@ -245,69 +291,72 @@ export default function Page() {
         <div className="mx-auto max-w-6xl px-6">
           <FadeIn>
             <div className="text-center">
-              <p className="text-sm uppercase tracking-[0.3em] text-accent">Passez à l'action après votre audit</p>
-              <h2 className="mt-4 text-3xl font-semibold">
-                Mise en conformité réalisée automatiquement par notre agent IA sous 48h
-              </h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent">Passez à l'action après votre audit</p>
+              <h2 className="mt-3 text-3xl font-semibold text-night">Mise en conformité automatique sous 48h</h2>
             </div>
             <div className="mt-10 grid gap-6 md:grid-cols-3">
               {pricing.map((plan) => (
                 <div
                   key={plan.name}
-                  className={`flex flex-col rounded-3xl border ${
-                    plan.recommended ? "border-accent shadow-glow" : "border-white/10"
-                  } bg-white/5 p-6 text-white`}
+                  className={`flex flex-col rounded-2xl border bg-white p-6 transition hover:-translate-y-1 hover:shadow-card ${
+                    plan.recommended ? "border-2 border-accent shadow-glowStrong scale-105" : "border-border"
+                  } ${plan.note ? "relative" : ""}`}
                 >
                   {plan.recommended && (
-                    <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-accent/40 px-3 py-1 text-xs text-accent">
-                      <Star className="h-3.5 w-3.5" /> Recommandé
+                    <span className="self-end rounded-full bg-[#EEF2FF] px-3 py-1 text-xs font-semibold text-accent">Recommandé</span>
+                  )}
+                  {plan.note && (
+                    <span className="self-end rounded-full bg-success/10 px-3 py-1 text-xs font-semibold text-success">
+                      Inclus 1 an
                     </span>
                   )}
-                  <div className="space-y-1">
-                    <p className="text-sm text-white/60">{plan.cadence}</p>
-                    <h3 className="text-3xl font-semibold">{plan.name}</h3>
-                    <p className="text-4xl font-semibold">{plan.price}</p>
+                  <p className="mt-4 text-xs uppercase tracking-[0.3em] text-slate">{plan.cadence}</p>
+                  <div className="mt-3 flex items-baseline gap-2">
+                    <p className="text-5xl font-bold text-night">{plan.price}</p>
+                    <span className="text-base text-slate">HT</span>
                   </div>
-                  <ul className="mt-6 space-y-3 text-sm text-white/80">
+                  <div className="my-6 h-px w-full bg-border" />
+                  <ul className="space-y-3 text-sm text-night">
                     {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2">
-                        <Check className="mt-0.5 h-4 w-4 text-accent" />
-                        <span>{feature}</span>
+                      <li key={feature} className="flex items-center gap-3">
+                        <Check className="h-4 w-4 text-success" />
+                        {feature}
                       </li>
                     ))}
                   </ul>
-                  {plan.note && <p className="mt-4 text-sm text-white/60">{plan.note}</p>}
                   <div className="mt-8">
                     <CheckoutButton
                       label={plan.name === "Maintenance" ? "Ajouter à mon pack" : "Acheter maintenant"}
                       priceKey={plan.priceKey}
-                      variant={plan.recommended ? "primary" : "outline"}
+                      variant="primary"
                     />
                   </div>
                 </div>
               ))}
             </div>
-            <div className="mt-10 text-center text-sm text-white/70">
-              Vous avez des questions ?{" "}
-              <Link href={calendlyUrl} className="text-accent" target="_blank">
-                Réserver un appel gratuit
-              </Link>
-            </div>
+            <p className="mt-8 text-center text-sm text-slate">
+              Questions ? <Link href={calendlyUrl} className="text-accent" target="_blank">Réserver un appel gratuit</Link>
+            </p>
           </FadeIn>
         </div>
       </section>
 
-      {/* SOCIAL PROOF */}
-      <section className="section border-y border-white/5" id="social-proof">
+      {/* TESTIMONIALS */}
+      <section className="section bg-surface" id="social-proof">
         <div className="mx-auto max-w-6xl px-6">
           <FadeIn>
-            <h2 className="text-3xl font-semibold text-white">Ils sont passés de l'ombre à la lumière IA</h2>
-            <div className="mt-8 grid gap-6 md:grid-cols-3">
-              {testimonials.map((item) => (
-                <div key={item.label} className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                  <p className="text-sm text-white/60">{item.label}</p>
-                  <p className="mt-2 text-lg text-success">Score {item.delta}</p>
-                  <p className="mt-4 text-white/80">“{item.quote}”</p>
+            <div className="grid gap-6 md:grid-cols-3">
+              {testimonials.map((item, index) => (
+                <div
+                  key={item.label}
+                  className={`rounded-2xl border border-border bg-white p-6 shadow-sm md:${index === 0 ? "-rotate-1" : index === 2 ? "rotate-1" : "rotate-0"}`}
+                >
+                  <Quote className="h-12 w-12 text-[#EEF2FF]" />
+                  <p className="mt-4 text-base italic text-night">“{item.quote}”</p>
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="rounded-full bg-success/10 px-3 py-1 text-xs font-semibold text-success">{item.delta}</span>
+                    <p className="text-sm text-slate">{item.label}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -317,35 +366,31 @@ export default function Page() {
 
       {/* FAQ */}
       <section className="section" id="faq">
-        <div className="mx-auto max-w-5xl px-6">
+        <div className="mx-auto max-w-3xl px-6">
           <FadeIn>
-            <h2 className="text-3xl font-semibold text-white">FAQ</h2>
-            <div className="mt-6 space-y-4">
-              {faq.map((item) => (
-                <details key={item.question} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <summary className="cursor-pointer list-none text-lg font-medium text-white">
-                    {item.question}
-                  </summary>
-                  <p className="mt-3 text-white/70">{item.answer}</p>
-                </details>
-              ))}
-            </div>
+            {faq.map((item) => (
+              <details key={item.question} className="border-b border-border py-4">
+                <summary className="flex cursor-pointer items-center justify-between text-base font-semibold text-night">
+                  {item.question}
+                  <span className="text-accent">+</span>
+                </summary>
+                <p className="mt-3 text-sm text-slate">{item.answer}</p>
+              </details>
+            ))}
           </FadeIn>
         </div>
       </section>
 
-      {/* FINAL CTA */}
-      <section className="section border-t border-white/5" id="cta-final">
-        <div className="mx-auto max-w-4xl px-6 text-center">
+      {/* CTA FINAL */}
+      <section className="section">
+        <div className="mx-auto max-w-4xl rounded-3xl bg-gradient-to-br from-[#4F46E5] to-accent p-12 text-center text-white">
           <FadeIn>
-            <h2 className="text-3xl font-semibold text-white">
-              Si vous avez un site, vous méritez d'être visible partout — y compris sur les IA.
-            </h2>
+            <h2 className="text-4xl font-semibold">Si vous avez un site, vous méritez d'être visible partout — y compris sur les IA.</h2>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
-              <a href="#audit" className="rounded-2xl bg-accent px-6 py-3 text-base font-semibold text-white">
-                Obtenir mon audit gratuit
+              <a href="#audit" className="rounded-xl bg-white px-6 py-4 text-base font-semibold text-accent">
+                Je veux mon score maintenant
               </a>
-              <a href="#pricing" className="rounded-2xl border border-white/20 px-6 py-3 text-base font-semibold text-white">
+              <a href="#pricing" className="rounded-xl border border-white px-6 py-4 text-base font-semibold text-white">
                 Voir les offres
               </a>
             </div>
@@ -354,17 +399,21 @@ export default function Page() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-white/5 py-8">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 text-sm text-white/60">
-          <p>Agentable · © 2025</p>
-          <div className="flex flex-wrap items-center gap-4">
+      <footer className="bg-night py-10 text-sm text-[#94A3B8]">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-base font-semibold text-white">Agentable</p>
+            <p>SIRET [A_REMPLACER] · Service 100% français 🇫🇷</p>
+            <p>© 2025 Agentable — Tous droits réservés</p>
+          </div>
+          <div className="flex flex-wrap gap-6 text-sm">
             <Link href="/mentions-legales" className="text-white/80">
               Mentions légales
             </Link>
             <a href="mailto:contact@agentable.fr" className="text-white/80">
               Contact
             </a>
-            <Link href={calendlyUrl} className="text-accent" target="_blank">
+            <Link href={calendlyUrl} className="text-white/80" target="_blank">
               Besoin d'aide ? Parlons-en
             </Link>
           </div>

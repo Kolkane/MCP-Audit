@@ -1,45 +1,45 @@
 "use client";
 
-import { motion, useAnimation } from "framer-motion";
+import { motion, useSpring, useTransform } from "framer-motion";
 import { useEffect, useState } from "react";
 
 export function ScoreAnimation() {
-  const controls = useAnimation();
-  const [score, setScore] = useState(23);
+  const [score, setScore] = useState(0);
+  const bar = useSpring(0, { stiffness: 80, damping: 20 });
+  const width = useTransform(bar, (value) => `${Math.max(0, Math.min(100, value))}%`);
 
   useEffect(() => {
-    controls.start({ width: "100%", transition: { duration: 2.5, ease: "easeOut" } });
     let start = 0;
-    const steps = [23, 60, 82, 100];
+    const end = 23;
+    const duration = 1500;
+    const step = 16;
     const timer = setInterval(() => {
-      setScore(() => {
-        const value = steps[start] ?? 100;
-        start += 1;
-        if (start >= steps.length) {
-          clearInterval(timer);
-        }
-        return value;
-      });
-    }, 600);
+      start += step;
+      const progress = Math.min(start / duration, 1);
+      const value = Math.round(end * progress);
+      setScore(value);
+      bar.set(value);
+      if (progress >= 1) {
+        clearInterval(timer);
+      }
+    }, step);
     return () => clearInterval(timer);
-  }, [controls]);
-
-  const gradient = "bg-gradient-to-r from-danger via-warning to-success";
+  }, [bar]);
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-      <div className="flex items-center justify-between text-sm text-white/70">
-        <span>Score Agentable</span>
-        <span>{score}/100</span>
+    <div className="w-full rounded-3xl border border-border bg-white p-6 shadow-glow">
+      <div className="text-xs font-semibold uppercase tracking-[0.3em] text-slate">Score moyen PME FR</div>
+      <div className="mt-4 flex items-end gap-4">
+        <div className="text-5xl font-bold text-night">{score}</div>
+        <div className="text-base font-medium text-slate">/100</div>
       </div>
-      <div className="relative mt-4 h-3 w-full rounded-full bg-white/10">
+      <div className="relative mt-4 h-3 w-full rounded-full bg-surface">
         <motion.div
-          animate={controls}
-          className={`absolute inset-y-0 left-0 rounded-full ${gradient}`}
-          style={{ width: "30%" }}
+          className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-danger via-warning to-success"
+          style={{ width }}
         />
       </div>
-      <p className="mt-3 text-sm text-white/80">De rouge à vert en moins de 48h.</p>
+      <p className="mt-4 text-sm text-slate">Passe en zone verte dès 48h après l'audit.</p>
     </div>
   );
 }

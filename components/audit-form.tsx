@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, ShieldCheck } from "lucide-react";
 
 const structureOptions = [
   "Freelance",
@@ -82,51 +82,46 @@ export function AuditForm() {
     }
   };
 
+  const inputBase =
+    "mt-2 w-full rounded-xl border border-border bg-white px-4 py-3 text-base text-night transition focus:border-accent focus:ring-4 focus:ring-accent/10 focus:outline-none";
+
   return (
-    <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-      <div className="grid gap-4 md:grid-cols-2">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid gap-5 md:grid-cols-2">
         <div>
-          <label className="text-sm text-white/70">Prénom</label>
-          <input
-            value={values.firstName}
-            onChange={handleChange("firstName")}
-            className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-white focus:border-accent focus:outline-none"
-            placeholder="Alex"
-          />
-          {errors.firstName && <p className="mt-1 text-xs text-danger">{errors.firstName}</p>}
+          <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate">Prénom</label>
+          <input value={values.firstName} onChange={handleChange("firstName")} className={inputBase} placeholder="Alex" />
+          {errors.firstName && <p className="mt-2 text-xs text-danger">{errors.firstName}</p>}
         </div>
         <div>
-          <label className="text-sm text-white/70">Email pro</label>
+          <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate">Email pro</label>
           <input
             value={values.email}
             onChange={handleChange("email")}
-            className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-white focus:border-accent focus:outline-none"
+            className={inputBase}
             placeholder="prenom@entreprise.com"
             type="email"
           />
-          {errors.email && <p className="mt-1 text-xs text-danger">{errors.email}</p>}
+          {errors.email && <p className="mt-2 text-xs text-danger">{errors.email}</p>}
         </div>
       </div>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-5 md:grid-cols-2">
         <div>
-          <label className="text-sm text-white/70">URL du site</label>
+          <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate">URL du site</label>
           <input
             value={values.website}
             onChange={handleChange("website")}
-            className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-white focus:border-accent focus:outline-none"
-            placeholder="ex: agentable.fr"
+            className={inputBase}
+            placeholder="agentable.fr"
+            inputMode="url"
           />
-          {errors.website && <p className="mt-1 text-xs text-danger">{errors.website}</p>}
+          {errors.website && <p className="mt-2 text-xs text-danger">{errors.website}</p>}
         </div>
         <div>
-          <label className="text-sm text-white/70">Type de structure</label>
-          <select
-            value={values.structure}
-            onChange={handleChange("structure")}
-            className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-white focus:border-accent focus:outline-none"
-          >
+          <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate">Type de structure</label>
+          <select value={values.structure} onChange={handleChange("structure")} className={inputBase}>
             {structureOptions.map((option) => (
-              <option key={option} value={option} className="bg-background">
+              <option key={option} value={option}>
                 {option}
               </option>
             ))}
@@ -136,14 +131,23 @@ export function AuditForm() {
       <button
         type="submit"
         disabled={status === "loading"}
-        className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-accent px-6 py-4 text-base font-semibold text-white transition hover:bg-indigo-400"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-6 py-4 text-lg font-semibold text-white shadow-[0_8px_28px_rgba(99,102,241,0.35)] transition hover:bg-[#4F46E5] disabled:opacity-70"
       >
-        {status === "loading" ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-        <span>Recevoir mon audit gratuit →</span>
+        {status === "loading" ? <Loader2 className="h-5 w-5 animate-spin" /> : null}
+        {status === "loading" ? "Envoi en cours..." : "Recevoir mon audit gratuit"}
       </button>
-      <p className="text-center text-sm text-white/60">Rapport livré sous 24h · Sans engagement · 100% gratuit</p>
+      <div className="flex flex-wrap justify-center gap-3 text-xs font-semibold text-slate">
+        <span className="rounded-full bg-surface px-3 py-1">✓ 24h</span>
+        <span className="rounded-full bg-surface px-3 py-1">✓ Sans engagement</span>
+        <span className="rounded-full bg-surface px-3 py-1">✓ 100% gratuit</span>
+      </div>
+      <p className="flex items-center justify-center gap-2 text-xs text-slate">
+        <ShieldCheck className="h-4 w-4 text-accent" /> Données protégées · RGPD · Jamais revendues
+      </p>
       {message && (
-        <p className={`text-center text-sm ${status === "success" ? "text-success" : "text-danger"}`}>{message}</p>
+        <p className={`text-center text-sm font-medium ${status === "success" ? "text-success" : "text-danger"}`}>
+          {message}
+        </p>
       )}
     </form>
   );
