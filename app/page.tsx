@@ -4,6 +4,7 @@ import {
   Briefcase,
   Building2,
   Check,
+  MessageCircle,
   Quote,
   ShieldCheck,
   ShoppingBag,
@@ -86,8 +87,21 @@ const pricing = [
     ],
     priceKey: "subscription" as const,
     recommended: true,
-    variant: "outline",
-    note: "Rentabilisé dès le 1er client trouvé via IA"
+    variant: "outline"
+  },
+  {
+    name: "Une question ?",
+    price: "0€",
+    cadence: "Gratuit",
+    subtitle: "Vous préférez en parler avant de vous lancer ?",
+    features: [
+      "Analyse de votre situation en direct",
+      "Réponses à toutes vos questions",
+      "Recommandation personnalisée",
+      "Sans engagement, sans pression"
+    ],
+    note: "Appel de 20 min",
+    ctaLink: process.env.NEXT_PUBLIC_CALENDLY_URL || "https://calendly.com/agentable/demo"
   }
 ];
 
@@ -324,12 +338,16 @@ export default function Page() {
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent">Passez à l'action après votre audit</p>
               <h2 className="mt-3 text-3xl font-semibold text-night">Mise en conformité automatique sous 48h</h2>
             </div>
-            <div className="mt-10 grid gap-6 md:grid-cols-2">
+            <div className="mt-10 grid gap-6 md:grid-cols-3">
               {pricing.map((plan) => (
                 <div
                   key={plan.name}
-                  className={`flex flex-col rounded-2xl border bg-white p-6 transition hover:-translate-y-1 hover:shadow-card ${
-                    plan.recommended ? "border-2 border-accent shadow-glowStrong scale-105" : "border-border"
+                  className={`flex flex-col rounded-2xl border p-6 transition hover:-translate-y-1 hover:shadow-card ${
+                    plan.recommended
+                      ? "border-2 border-accent bg-white shadow-glowStrong scale-105"
+                      : plan.ctaLink
+                        ? "border-[1.5px] border-dashed border-[#C7D2FE] bg-[#F8F9FF]"
+                        : "border-border bg-white"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -340,35 +358,49 @@ export default function Page() {
                   </div>
                   <div className="mt-4 flex flex-col gap-2">
                     <h3 className="text-3xl font-semibold text-night">{plan.name}</h3>
-                    <p className="text-4xl font-bold text-night">{plan.price} <span className="text-base font-medium text-slate">HT</span></p>
-                    <p className="text-sm text-slate">{plan.subtitle}</p>
+                    <p className="text-4xl font-bold text-night">
+                      {plan.price} {plan.priceKey && <span className="text-base font-medium text-slate">HT</span>}
+                    </p>
+                    <p className="text-sm text-slate">{plan.priceKey ? plan.subtitle : <em>{plan.subtitle}</em>}</p>
                   </div>
                   <div className="my-6 h-px w-full bg-border" />
                   <ul className="space-y-3 text-sm text-night">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-center gap-3">
-                        <Check className="h-4 w-4 text-success" />
+                        {plan.ctaLink ? (
+                          <MessageCircle className="h-4 w-4 text-accent" />
+                        ) : (
+                          <Check className="h-4 w-4 text-success" />
+                        )}
                         {feature}
                       </li>
                     ))}
                   </ul>
-                  {plan.note && <p className="mt-4 text-sm italic text-slate">{plan.note}</p>}
+                  {plan.note && <p className="mt-4 text-sm text-slate">{plan.note}</p>}
                   <div className="mt-6">
-                    <CheckoutButton
-                      label={plan.priceKey === "subscription" ? "Démarrer mon abonnement" : "Acheter maintenant"}
-                      priceKey={plan.priceKey}
-                      variant={plan.priceKey === "subscription" ? "outline" : "primary"}
-                    />
+                    {plan.priceKey ? (
+                      <CheckoutButton
+                        label={plan.priceKey === "subscription" ? "Démarrer mon abonnement" : "Acheter maintenant"}
+                        priceKey={plan.priceKey}
+                        variant={plan.priceKey === "subscription" ? "outline" : "primary"}
+                      />
+                    ) : (
+                      <Link
+                        href={plan.ctaLink!}
+                        target="_blank"
+                        className="block w-full rounded-2xl border border-accent px-5 py-3 text-center text-sm font-semibold text-accent transition hover:bg-indigo-50"
+                      >
+                        Réserver mon appel gratuit →
+                      </Link>
+                    )}
                   </div>
+                  {!plan.priceKey && <p className="mt-3 text-center text-xs text-[#94A3B8]">⏱ Disponible sous 24h</p>}
                 </div>
               ))}
             </div>
             <div className="mt-8 text-center text-sm text-slate">
               <p>
                 Pas sûr ? <a href="#audit" className="text-accent">Commencez par l'audit gratuit →</a>
-              </p>
-              <p className="mt-2">
-                Des questions ? <Link href={calendlyUrl} className="text-accent" target="_blank">Réservez un appel gratuit</Link>
               </p>
             </div>
           </FadeIn>
