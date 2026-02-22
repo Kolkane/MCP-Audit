@@ -189,24 +189,43 @@ export default function Page() {
 
       {/* PROCESS */}
       <section className="section" id="process">
-        <div className="mx-auto max-w-3xl px-6">
+        <div className="mx-auto max-w-6xl px-6">
           <FadeIn>
-            <h2 className="text-3xl font-semibold text-center">Comment ça marche</h2>
-            <div className="relative mt-10">
-              <div className="absolute left-[15px] top-4 bottom-4 border-l-2 border-dashed border-indigo-200" />
-              <div className="space-y-8">
-                {steps.map((step, index) => (
-                  <div key={step.number} className="relative pl-12">
-                    <div className="absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#4F46E5] text-xs font-bold text-white">
+            <h2 className="text-center text-3xl font-bold text-night">Comment ça marche</h2>
+            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+              {steps.map((step, index) => {
+                const Icon = step.icon;
+                const isLast = index === steps.length - 1;
+                const isFinal = index === steps.length - 1;
+                return (
+                  <div
+                    key={step.number}
+                    className={`relative overflow-hidden rounded-2xl border p-6 transition ${
+                      isFinal
+                        ? "border-transparent bg-[#4F46E5] text-white shadow-[0_20px_40px_rgba(79,70,229,0.35)]"
+                        : "border-[#E2E8F0] bg-white shadow-sm"
+                    } hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(99,102,241,0.1)]`}
+                  >
+                    <span className={`absolute right-4 top-3 text-6xl font-black text-[#F1F5F9] ${isFinal ? "text-indigo-400/30" : "text-[#F1F5F9]"}`}>
                       {step.number}
+                    </span>
+                    <div className={`relative flex h-12 w-12 items-center justify-center rounded-full ${isFinal ? "bg-white/20 text-white" : "bg-indigo-50 text-indigo-500"}`}>
+                      <Icon className="h-5 w-5" />
                     </div>
-                    <h3 className="text-sm font-semibold text-night">{step.title}</h3>
-                    <p className="mt-1 text-xs text-slate">{step.description}</p>
+                    <div className="relative z-10">
+                      <h3 className={`mt-4 text-base font-bold ${isFinal ? "text-white" : "text-night"}`}>{step.title}</h3>
+                      <p className={`mt-2 text-sm leading-relaxed ${isFinal ? "text-white/80" : "text-slate"}`}>{step.description}</p>
+                    </div>
+                    {!isLast && (
+                      <div className="absolute right-[-14px] top-1/2 hidden text-indigo-300 lg:block">
+                        →
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
-              <div className="mt-6 flex justify-center text-indigo-400">↓</div>
+                );
+              })}
             </div>
+            <p className="mt-6 text-center text-sm text-[#94A3B8]">⚡ Résultat affiché en 60 secondes · Aucune inscription requise</p>
           </FadeIn>
         </div>
       </section>
