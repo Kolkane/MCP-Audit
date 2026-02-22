@@ -42,42 +42,38 @@ const personas = [
 
 const pricing = [
   {
-    name: "Starter",
-    price: "490€",
-    cadence: "one-shot",
+    name: "One-shot",
+    price: "590€",
+    cadence: "Paiement unique",
+    subtitle: "Je règle ça une fois pour toutes",
     features: [
-      "Structuration données",
-      "Endpoint MCP basique",
-      "Rapport de conformité",
-      "Score garanti >60/100"
+      "Audit complet inclus",
+      "Mise en conformité complète",
+      "Endpoint MCP + schema.org optimisé",
+      "Score garanti >80/100",
+      "Rapport de conformité final",
+      "Livraison sous 48h"
     ],
-    priceKey: "starter" as const
+    priceKey: "oneShot" as const,
+    variant: "primary"
   },
   {
-    name: "Pro",
-    price: "790€",
-    cadence: "one-shot",
+    name: "Abonnement",
+    price: "99€",
+    cadence: "Sans engagement",
+    subtitle: "Je reste visible en permanence",
     features: [
-      "Tout Starter inclus",
-      "Endpoint MCP complet + API key",
-      "Optimisation schema.org + métadonnées IA",
-      "Score garanti >80/100"
-    ],
-    priceKey: "pro" as const,
-    recommended: true
-  },
-  {
-    name: "Maintenance",
-    price: "79€",
-    cadence: "/mois",
-    features: [
-      "Monitoring visibilité IA",
+      "Mise en conformité initiale incluse",
+      "Monitoring visibilité IA mensuel",
       "Mises à jour automatiques",
-      "Alertes score",
-      "Rapport mensuel"
+      "Alertes si score baisse",
+      "Rapport mensuel détaillé",
+      "Priorité de traitement"
     ],
-    priceKey: "maintenance" as const,
-    note: "Inclus 1 an"
+    priceKey: "subscription" as const,
+    recommended: true,
+    variant: "outline",
+    note: "Rentabilisé dès le 1er client trouvé via IA"
   }
 ];
 
@@ -297,26 +293,24 @@ export default function Page() {
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent">Passez à l'action après votre audit</p>
               <h2 className="mt-3 text-3xl font-semibold text-night">Mise en conformité automatique sous 48h</h2>
             </div>
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
+            <div className="mt-10 grid gap-6 md:grid-cols-2">
               {pricing.map((plan) => (
                 <div
                   key={plan.name}
                   className={`flex flex-col rounded-2xl border bg-white p-6 transition hover:-translate-y-1 hover:shadow-card ${
                     plan.recommended ? "border-2 border-accent shadow-glowStrong scale-105" : "border-border"
-                  } ${plan.note ? "relative" : ""}`}
+                  }`}
                 >
-                  {plan.recommended && (
-                    <span className="self-end rounded-full bg-[#EEF2FF] px-3 py-1 text-xs font-semibold text-accent">Recommandé</span>
-                  )}
-                  {plan.note && (
-                    <span className="self-end rounded-full bg-success/10 px-3 py-1 text-xs font-semibold text-success">
-                      Inclus 1 an
-                    </span>
-                  )}
-                  <p className="mt-4 text-xs uppercase tracking-[0.3em] text-slate">{plan.cadence}</p>
-                  <div className="mt-3 flex items-baseline gap-2">
-                    <p className="text-5xl font-bold text-night">{plan.price}</p>
-                    <span className="text-base text-slate">HT</span>
+                  <div className="flex items-center justify-between">
+                    <span className="rounded-full bg-[#F1F5F9] px-3 py-1 text-xs font-semibold text-slate">{plan.cadence}</span>
+                    {plan.recommended && (
+                      <span className="rounded-full bg-[#EEF2FF] px-3 py-1 text-xs font-semibold text-accent">Recommandé</span>
+                    )}
+                  </div>
+                  <div className="mt-4 flex flex-col gap-2">
+                    <h3 className="text-3xl font-semibold text-night">{plan.name}</h3>
+                    <p className="text-4xl font-bold text-night">{plan.price} <span className="text-base font-medium text-slate">HT</span></p>
+                    <p className="text-sm text-slate">{plan.subtitle}</p>
                   </div>
                   <div className="my-6 h-px w-full bg-border" />
                   <ul className="space-y-3 text-sm text-night">
@@ -327,19 +321,25 @@ export default function Page() {
                       </li>
                     ))}
                   </ul>
-                  <div className="mt-8">
+                  {plan.note && <p className="mt-4 text-sm italic text-slate">{plan.note}</p>}
+                  <div className="mt-6">
                     <CheckoutButton
-                      label={plan.name === "Maintenance" ? "Ajouter à mon pack" : "Acheter maintenant"}
+                      label={plan.priceKey === "subscription" ? "Démarrer mon abonnement" : "Acheter maintenant"}
                       priceKey={plan.priceKey}
-                      variant="primary"
+                      variant={plan.priceKey === "subscription" ? "outline" : "primary"}
                     />
                   </div>
                 </div>
               ))}
             </div>
-            <p className="mt-8 text-center text-sm text-slate">
-              Questions ? <Link href={calendlyUrl} className="text-accent" target="_blank">Réserver un appel gratuit</Link>
-            </p>
+            <div className="mt-8 text-center text-sm text-slate">
+              <p>
+                Pas sûr ? <a href="#audit" className="text-accent">Commencez par l'audit gratuit →</a>
+              </p>
+              <p className="mt-2">
+                Des questions ? <Link href={calendlyUrl} className="text-accent" target="_blank">Réservez un appel gratuit</Link>
+              </p>
+            </div>
           </FadeIn>
         </div>
       </section>

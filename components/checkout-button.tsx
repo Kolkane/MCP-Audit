@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 
 interface CheckoutButtonProps {
   label: string;
-  priceKey: "starter" | "pro" | "maintenance";
+  priceKey: "oneShot" | "subscription";
   variant?: "primary" | "outline";
 }
 
@@ -35,11 +35,11 @@ export function CheckoutButton({ label, priceKey, variant = "primary" }: Checkou
   };
 
   const baseStyles =
-    "w-full rounded-2xl px-5 py-3 text-center text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50";
+    "w-full rounded-2xl px-5 py-3 text-center text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30";
 
   const variants = {
-    primary: "bg-accent text-white hover:bg-indigo-400",
-    outline: "border border-white/30 text-white hover:border-white"
+    primary: "bg-accent text-white hover:bg-[#4F46E5]",
+    outline: "border border-accent text-accent hover:bg-[#EEF2FF]"
   };
 
   return (

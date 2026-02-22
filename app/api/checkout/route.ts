@@ -2,9 +2,8 @@ import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 
 const priceMap: Record<string, string | undefined> = {
-  starter: process.env.STRIPE_PRICE_STARTER,
-  pro: process.env.STRIPE_PRICE_PRO,
-  maintenance: process.env.STRIPE_PRICE_MAINTENANCE
+  oneShot: process.env.STRIPE_PRICE_ONSHOT,
+  subscription: process.env.STRIPE_PRICE_SUBSCRIPTION
 };
 
 export async function POST(request: Request) {
@@ -18,8 +17,9 @@ export async function POST(request: Request) {
     const origin = request.headers.get("origin") || "https://agentable.vercel.app";
 
     const stripe = getStripe();
+    const isSubscription = plan === "subscription";
     const session = await stripe.checkout.sessions.create({
-      mode: "payment",
+      mode: isSubscription ? "subscription" : "payment",
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${origin}/merci`,
       cancel_url: `${origin}#pricing`,
