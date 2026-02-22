@@ -32,17 +32,17 @@ export function PricingPlans({ calendlyUrl }: { calendlyUrl: string }) {
         <div className="text-sm font-semibold uppercase tracking-wide text-slate">Mise en conformité</div>
         <h3 className="mt-2 text-4xl font-black text-night">À partir de {activation.price}€ HT</h3>
         <p className="text-sm italic text-slate">Calculé selon votre score</p>
-        <div className="mt-4 rounded-2xl bg-[#F8F9FF] p-4 text-sm">
+        <div className="mt-4 space-y-2 text-xs text-[#94A3B8]">
           {activationOptions.map((option, idx) => (
             <button
               key={option.label}
               onClick={() => setSelectedIndex(idx)}
               className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition ${
-                idx === selectedIndex ? "bg-white shadow-sm" : "bg-transparent"
+                idx === selectedIndex ? "bg-[#F8F9FF]" : "bg-transparent"
               }`}
             >
               <span className="font-semibold text-night">{option.label}</span>
-              <span className={`${option.color} font-semibold`}>{option.price}€ · {option.note}</span>
+              <span className={`${option.color}`}>{option.price}€ · {option.note}</span>
             </button>
           ))}
         </div>
@@ -69,7 +69,7 @@ export function PricingPlans({ calendlyUrl }: { calendlyUrl: string }) {
               />
               Ajouter la maintenance
             </span>
-            <span className="text-accent">+79€ HT/mois</span>
+            <span className="text-sm text-slate">+79€ HT/mois</span>
           </label>
           <p className="mt-1 ml-6 text-xs text-slate">Monitoring mensuel · Mises à jour · Alertes score · Sans engagement</p>
         </div>
@@ -93,7 +93,7 @@ export function PricingPlans({ calendlyUrl }: { calendlyUrl: string }) {
           onClick={handleScroll}
           className="mt-4 w-full rounded-xl bg-[#4F46E5] px-5 py-4 text-sm font-semibold text-white shadow-md transition hover:bg-[#4338CA]"
         >
-          Découvrir mon prix et payer →
+          Analyser mon site gratuitement →
         </button>
         <p className="mt-2 text-center text-xs text-[#94A3B8]">Prix exact affiché après analyse de votre URL</p>
       </div>
