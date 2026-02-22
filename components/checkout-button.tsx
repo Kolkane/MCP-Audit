@@ -5,20 +5,23 @@ import { Loader2 } from "lucide-react";
 
 interface CheckoutButtonProps {
   label: string;
-  priceKey: "oneShot" | "subscription";
+  priceKey?: "oneShot" | "subscription";
+  priceId?: string | null;
+  mode?: "payment" | "subscription";
   variant?: "primary" | "outline";
 }
 
-export function CheckoutButton({ label, priceKey, variant = "primary" }: CheckoutButtonProps) {
+export function CheckoutButton({ label, priceKey, priceId, mode = "payment", variant = "primary" }: CheckoutButtonProps) {
   const [loading, setLoading] = useState(false);
 
   const handleClick = async () => {
+    if (!priceId && !priceKey) return;
     setLoading(true);
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: priceKey })
+        body: JSON.stringify(priceId ? { priceId, mode } : { plan: priceKey })
       });
       const data = await response.json();
       if (data.url) {

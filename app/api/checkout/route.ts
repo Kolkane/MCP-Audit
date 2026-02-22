@@ -2,25 +2,37 @@ import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 
 const priceMap: Record<string, string | undefined> = {
-  oneShot: process.env.STRIPE_PRICE_ONSHOT,
-  subscription: process.env.STRIPE_PRICE_SUBSCRIPTION
+  simple: process.env.STRIPE_PRICE_SIMPLE,
+  medium: process.env.STRIPE_PRICE_MEDIUM,
+  complex: process.env.STRIPE_PRICE_COMPLEX,
+  maintenance: process.env.STRIPE_PRICE_MAINTENANCE
 };
 
 export async function POST(request: Request) {
   try {
-    const { plan } = await request.json();
-    const priceId = priceMap[plan as string];
-    if (!priceId) {
+    const { plan, priceId, mode } = await request.json();
+    const origin = request.headers.get("origin") || "https://agentable.vercel.app";
+    const stripe = getStripe();
+
+    if (priceId) {
+      const session = await stripe.checkout.sessions.create({
+        mode: mode === "subscription" ? "subscription" : "payment",
+        line_items: [{ price: priceId, quantity: 1 }],
+        success_url: `${origin}/merci`,
+        cancel_url: `${origin}#pricing`
+      });
+      return NextResponse.json({ url: session.url });
+    }
+
+    const mappedPriceId = priceMap[plan as string];
+    if (!mappedPriceId) {
       return NextResponse.json({ error: "Plan inconnu" }, { status: 400 });
     }
 
-    const origin = request.headers.get("origin") || "https://agentable.vercel.app";
-
-    const stripe = getStripe();
     const isSubscription = plan === "subscription";
     const session = await stripe.checkout.sessions.create({
       mode: isSubscription ? "subscription" : "payment",
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{ price: mappedPriceId, quantity: 1 }],
       success_url: `${origin}/merci`,
       cancel_url: `${origin}#pricing`,
       metadata: { plan }

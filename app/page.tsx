@@ -1,49 +1,77 @@
 import Link from "next/link";
 import {
+  AlertCircle,
   ArrowRight,
   Briefcase,
   Building2,
   Check,
-  MessageCircle,
+  CreditCard,
+  EyeOff,
+  FileText,
+  FileX,
+  Link as LinkIcon,
   Quote,
   ShieldCheck,
   ShoppingBag,
   Sparkles,
   Star,
   Stethoscope,
+  TrendingDown,
   User,
   Wrench,
+  Zap,
   X
 } from "lucide-react";
 import { FadeIn } from "@/components/fade-in";
 import { ScoreAnimation } from "@/components/score-animation";
 import { AuditForm } from "@/components/audit-form";
-import { CheckoutButton } from "@/components/checkout-button";
 import { Navbar } from "@/components/navbar";
+import { HeroAnalyzer } from "@/components/hero-analyzer";
+import { PricingPlans } from "@/components/pricing-plans";
 
 const problemPoints = [
   {
     title: "Invisible sur ChatGPT",
-    description: "Un client demande un prestataire → tes concurrents sortent, toi non.",
-    icon: "ghost"
+    description: "Un client demande un prestataire → vos concurrents sortent, vous non.",
+    icon: EyeOff
   },
   {
     title: "Données illisibles",
-    description: "Les agents IA ne comprennent pas tes services ni tes offres.",
-    icon: "database"
+    description: "Les agents IA ne comprennent pas vos services ni vos offres.",
+    icon: FileX
   },
   {
     title: "Parts de marché perdues",
     description: "Chaque requête IA devient un lead confié à quelqu'un d'autre.",
-    icon: "users"
+    icon: TrendingDown
   }
 ];
 
 const steps = [
-  "Entrez l'URL de votre site → audit gratuit lancé",
-  "Recevez votre score + rapport PDF en 24h",
-  "Choisissez votre pack de mise en conformité",
-  "Notre agent corrige et optimise votre visibilité IA automatiquement"
+  {
+    title: "Entrez votre URL",
+    description: "Notre agent analyse votre site en 60 secondes",
+    icon: LinkIcon,
+    number: "01"
+  },
+  {
+    title: "Recevez votre score",
+    description: "Score + lacunes + prix personnalisé affichés instantanément. Rapport complet par email.",
+    icon: FileText,
+    number: "02"
+  },
+  {
+    title: "Choisissez votre formule",
+    description: "One-shot ou abonnement — prix calculé selon votre site",
+    icon: CreditCard,
+    number: "03"
+  },
+  {
+    title: "Conformité automatique",
+    description: "Notre agent optimise votre visibilité IA sous 48h",
+    icon: Zap,
+    number: "04"
+  }
 ];
 
 const personas = [
@@ -53,56 +81,6 @@ const personas = [
   { label: "Artisans", benefit: "Soyez trouvés même sans SEO avancé", icon: Wrench },
   { label: "Professions libérales", benefit: "Patients et clients vous trouvent", icon: Stethoscope },
   { label: "E-commerce", benefit: "Vos produits lus par les agents IA", icon: ShoppingBag }
-];
-
-const pricing = [
-  {
-    name: "One-shot",
-    price: "590€",
-    cadence: "Paiement unique",
-    subtitle: "Je règle ça une fois pour toutes",
-    features: [
-      "Audit complet inclus",
-      "Mise en conformité complète",
-      "Endpoint MCP + schema.org optimisé",
-      "Score garanti >80/100",
-      "Rapport de conformité final",
-      "Livraison sous 48h"
-    ],
-    priceKey: "oneShot" as const,
-    variant: "primary"
-  },
-  {
-    name: "Abonnement",
-    price: "99€",
-    cadence: "Sans engagement",
-    subtitle: "Je reste visible en permanence",
-    features: [
-      "Mise en conformité initiale incluse",
-      "Monitoring visibilité IA mensuel",
-      "Mises à jour automatiques",
-      "Alertes si score baisse",
-      "Rapport mensuel détaillé",
-      "Priorité de traitement"
-    ],
-    priceKey: "subscription" as const,
-    recommended: true,
-    variant: "outline"
-  },
-  {
-    name: "Une question ?",
-    price: "0€",
-    cadence: "Gratuit",
-    subtitle: "Vous préférez en parler avant de vous lancer ?",
-    features: [
-      "Analyse de votre situation en direct",
-      "Réponses à toutes vos questions",
-      "Recommandation personnalisée",
-      "Sans engagement, sans pression"
-    ],
-    note: "Appel de 20 min",
-    ctaLink: process.env.NEXT_PUBLIC_CALENDLY_URL || "https://calendly.com/agentable/demo"
-  }
 ];
 
 const testimonials = [
@@ -157,7 +135,11 @@ export default function Page() {
     <main className="bg-background text-night">
       <Navbar />
       {/* HERO */}
-      <section id="hero" className="hero-texture relative bg-gradient-to-br from-white to-[#EEF2FF] pt-32">
+      <section
+        id="hero"
+        className="hero-texture relative pt-32"
+        style={{ background: "linear-gradient(180deg, #EEF2FF 0%, #F5F7FF 60%, #FFFFFF 100%)" }}
+      >
         <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 lg:flex-row lg:items-center">
           <FadeIn>
             <div className="text-center lg:text-left">
@@ -168,22 +150,9 @@ export default function Page() {
                 Votre site existe sur Google. Mais existe-t-il pour ChatGPT, Perplexity et les agents IA ?
               </h1>
               <p className="mx-auto mt-6 max-w-2xl text-lg text-slate">
-                Obtenez votre score de visibilité IA gratuitement en 24h, puis laissez notre agent corriger vos données et apparaître en priorité sur ChatGPT, Perplexity et tous les agents IA.
+                Entrez votre URL ci-dessous — notre agent analyse votre visibilité IA en 60 secondes, gratuitement.
               </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
-                <a
-                  href="#audit"
-                  className="rounded-xl bg-accent px-7 py-4 text-base font-semibold text-white shadow-[0_12px_30px_rgba(99,102,241,0.25)] transition hover:bg-[#4F46E5]"
-                >
-                  Obtenir mon audit gratuit
-                </a>
-                <a
-                  href="#pricing"
-                  className="rounded-xl border border-accent px-7 py-4 text-base font-semibold text-accent transition hover:bg-[#EEF2FF]"
-                >
-                  Voir les offres
-                </a>
-              </div>
+              <HeroAnalyzer />
             </div>
           </FadeIn>
           <FadeIn>
@@ -195,20 +164,23 @@ export default function Page() {
       </section>
 
       {/* PROBLEM */}
-      <section className="section bg-surface" id="problem">
+      <section className="section bg-white" id="problem">
         <div className="mx-auto max-w-6xl px-6">
           <FadeIn>
             <div className="grid gap-6 md:grid-cols-3">
-              {problemPoints.map((point, index) => (
-                <div key={point.title} className="relative overflow-hidden rounded-2xl border border-border bg-white p-6 shadow-sm">
-                  <span className="absolute right-4 top-4 text-6xl font-bold text-surface">0{index + 1}</span>
-                  <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[#EEF2FF] text-accent">
-                    <Sparkles className="h-5 w-5" />
+              {problemPoints.map((point, index) => {
+                const Icon = point.icon;
+                return (
+                  <div key={point.title} className="relative overflow-hidden rounded-2xl border border-border bg-white p-6 shadow-sm">
+                    <span className="absolute right-4 top-4 text-6xl font-bold text-surface">0{index + 1}</span>
+                    <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-400">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <h3 className="mt-6 text-lg font-semibold text-night">{point.title}</h3>
+                    <p className="mt-2 text-sm text-slate">{point.description}</p>
                   </div>
-                  <h3 className="mt-6 text-lg font-semibold text-night">{point.title}</h3>
-                  <p className="mt-2 text-sm text-slate">{point.description}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </FadeIn>
         </div>
@@ -219,21 +191,22 @@ export default function Page() {
         <div className="mx-auto max-w-6xl px-6">
           <FadeIn>
             <h2 className="text-3xl font-semibold">Comment ça marche</h2>
-            <div className="mt-10 flex flex-col gap-10 lg:flex-row lg:items-start">
-              {steps.map((step, index) => (
-                <div key={step} className="relative flex flex-1 flex-col items-start gap-3">
-                  {index < steps.length - 1 && (
-                    <div className="absolute left-[52px] right-0 top-5 hidden border-t-2 border-dashed border-indigo-200 lg:block" />
-                  )}
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#4F46E5] text-lg font-bold text-white">
-                      {index + 1}
+            <div className="mt-10 grid gap-6 md:grid-cols-2">
+              {steps.map((step) => {
+                const Icon = step.icon;
+                return (
+                  <div key={step.number} className="flex h-full flex-col rounded-2xl border border-[#E2E8F0] bg-white p-6">
+                    <span className="w-fit rounded-full bg-[#4F46E5] px-2 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-white">
+                      {step.number}
+                    </span>
+                    <div className="mt-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50 text-indigo-400">
+                      <Icon className="h-7 w-7" />
                     </div>
-                    <p className="text-base font-semibold text-night">{step.split(" → ")[0]}</p>
+                    <h3 className="mt-4 text-base font-semibold text-night">{step.title}</h3>
+                    <p className="mt-2 text-sm text-slate leading-relaxed">{step.description}</p>
                   </div>
-                  <p className="max-w-[180px] text-sm text-slate">{step.split(" → ")[1]}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </FadeIn>
         </div>
@@ -243,45 +216,90 @@ export default function Page() {
       <section className="section" id="report">
         <div className="mx-auto max-w-5xl px-6">
           <FadeIn>
-            <div className="relative">
-              <div className="absolute inset-0 -rotate-2 rounded-3xl border border-border bg-white opacity-40"></div>
-              <div className="relative rounded-3xl border border-border bg-white p-8 shadow-card">
-                <div className="relative flex items-center justify-between overflow-hidden rounded-2xl bg-gradient-to-br from-[#4F46E5] to-accent p-4 text-white">
+            <div className="relative max-w-2xl rotate-1">
+              <div className="absolute inset-0 -rotate-3 scale-95 rounded-3xl bg-indigo-100 opacity-70"></div>
+              <div className="relative overflow-hidden rounded-3xl bg-white text-night shadow-[0_20px_60px_rgba(99,102,241,0.15)]">
+                <div className="flex items-center justify-between bg-gradient-to-br from-[#4F46E5] to-accent p-6 text-white">
                   <div>
-                    <p className="text-sm uppercase tracking-[0.3em]">Rapport Agentable — Exemple</p>
-                    <div className="mt-2 flex items-baseline gap-2">
-                      <span className="text-5xl font-black">34</span>
-                      <span className="text-xl text-white/70">/100</span>
-                    </div>
-                    <span className="mt-3 inline-flex items-center rounded-full bg-red-500/20 px-3 py-1 text-xs font-semibold text-red-200">
-                      ⚠ Score critique
-                    </span>
+                    <p className="text-xs uppercase tracking-[0.3em] text-white/70">Rapport Agentable — Exemple</p>
+                    <p className="text-lg font-bold">monsite-exemple.fr</p>
                   </div>
                   <ShieldCheck className="h-8 w-8 text-white/50" />
-                  <div
-                    className="pointer-events-none absolute inset-0 rounded-2xl opacity-[0.4]"
-                    style={{ backgroundImage: "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.2) 0%, transparent 60%)" }}
-                  />
                 </div>
-                <div className="mt-6 h-2 w-full rounded-full bg-surface">
-                  <div className="h-full w-1/3 rounded-full bg-gradient-to-r from-danger to-warning" />
-                </div>
-                <ul className="mt-6 space-y-3 text-slate">
-                  <li className="flex items-center gap-3 text-base text-danger">
-                    <X className="h-4 w-4" /> Données illisibles par les IA
-                  </li>
-                  <li className="flex items-center gap-3 text-base text-danger">
-                    <X className="h-4 w-4" /> Aucun endpoint MCP exploitable
-                  </li>
-                  <li className="flex items-center gap-3 text-base text-danger">
-                    <X className="h-4 w-4" /> Métadonnées obsolètes → faible confiance
-                  </li>
-                </ul>
-                <div className="mt-6 flex items-center justify-between">
-                  <p className="text-base font-semibold text-success">Valeur perdue estimée : 2 400€/mois</p>
-                  <a href="#pricing" className="rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-white">
-                    Corriger mon score →
-                  </a>
+                <div className="p-6">
+                  <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="relative h-[120px] w-[120px]">
+                        <svg width="120" height="120">
+                          <circle cx="60" cy="60" r="52" stroke="#F1F5F9" strokeWidth="8" fill="none" />
+                          <circle
+                            cx="60"
+                            cy="60"
+                            r="52"
+                            stroke="#EF4444"
+                            strokeWidth="8"
+                            fill="none"
+                            strokeDasharray={2 * Math.PI * 52}
+                            strokeDashoffset={2 * Math.PI * 52 - (34 / 100) * 2 * Math.PI * 52}
+                            strokeLinecap="round"
+                            transform="rotate(-90 60 60)"
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <span className="text-3xl font-black text-night">34</span>
+                          <span className="text-sm text-slate">/100</span>
+                        </div>
+                      </div>
+                      <span className="rounded-full bg-red-50 px-3 py-1 text-sm font-semibold text-red-600">⚠ Score critique</span>
+                    </div>
+                    <p className="max-w-xs text-sm text-slate">Votre site est quasi-invisible pour les agents IA.</p>
+                  </div>
+                  <div className="my-6 h-px w-full border-t border-[#F1F5F9]" />
+                  <div className="space-y-3">
+                    {[
+                      { label: "Schema.org", score: "8/20", color: "bg-red-500" },
+                      { label: "Données NAP", score: "12/20", color: "bg-orange-400" },
+                      { label: "Métadonnées", score: "6/20", color: "bg-red-500" },
+                      { label: "FAQ structurée", score: "4/20", color: "bg-red-500" },
+                      { label: "Vitesse page", score: "15/20", color: "bg-green-500" },
+                      { label: "Citations externes", score: "5/20", color: "bg-red-500" }
+                    ].map((item) => (
+                      <div key={item.label} className="flex items-center gap-4 border-b border-[#F8F9FF] pb-2">
+                        <div className="flex-1 text-sm font-semibold text-night">{item.label}</div>
+                        <div className="h-1.5 w-20 rounded-full bg-[#F1F5F9]">
+                          <div className="h-full rounded-full" style={{ width: item.score, background: item.color === "bg-green-500" ? "#22C55E" : item.color === "bg-orange-400" ? "#F97316" : "#EF4444" }} />
+                        </div>
+                        <div className="w-16 text-right text-xs text-slate">{item.score}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-6">
+                    <p className="text-sm font-semibold text-night">Problèmes critiques détectés :</p>
+                    <ul className="mt-2 space-y-2 text-sm text-night">
+                      {[
+                        "Vos données schema.org sont absentes",
+                        "Les agents IA ne retrouvent pas vos coordonnées",
+                        "Meta description introuvable pour ChatGPT"
+                      ].map((issue) => (
+                        <li key={issue} className="flex items-start gap-2 text-danger">
+                          <X className="h-4 w-4" />
+                          <span className="text-night">{issue}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                    <div className="flex items-center justify-between">
+                      <span>💸 Valeur business perdue estimée</span>
+                      <span className="text-lg font-bold">2 400€/mois</span>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex flex-col gap-3 rounded-xl bg-[#F8F9FF] px-4 py-3 text-sm text-slate md:flex-row md:items-center md:justify-between">
+                    <span>Prix d'activation estimé : 349€ HT</span>
+                    <a href="#pricing" className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white">
+                      Corriger mon score →
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -293,6 +311,15 @@ export default function Page() {
       <section className="section bg-surface" id="personas">
         <div className="mx-auto max-w-6xl px-6">
           <FadeIn>
+            <div className="text-center">
+              <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent">
+                Pour qui ?
+              </span>
+              <h2 className="mt-3 text-3xl font-bold text-night">Une solution pour chaque structure</h2>
+              <p className="mx-auto mt-2 max-w-xl text-base text-slate">
+                Peu importe votre secteur ou votre taille — si vous avez un site, vous perdez des clients sur les IA chaque jour.
+              </p>
+            </div>
             <div className="mt-8 grid gap-5 md:grid-cols-3">
               {personas.map((persona) => {
                 const Icon = persona.icon;
@@ -338,69 +365,10 @@ export default function Page() {
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent">Passez à l'action après votre audit</p>
               <h2 className="mt-3 text-3xl font-semibold text-night">Mise en conformité automatique sous 48h</h2>
             </div>
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {pricing.map((plan) => (
-                <div
-                  key={plan.name}
-                  className={`flex flex-col rounded-2xl border p-6 transition hover:-translate-y-1 hover:shadow-card ${
-                    plan.recommended
-                      ? "border-2 border-accent bg-white shadow-glowStrong scale-105"
-                      : plan.ctaLink
-                        ? "border-[1.5px] border-dashed border-[#C7D2FE] bg-[#F8F9FF]"
-                        : "border-border bg-white"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="rounded-full bg-[#F1F5F9] px-3 py-1 text-xs font-semibold text-slate">{plan.cadence}</span>
-                    {plan.recommended && (
-                      <span className="rounded-full bg-[#EEF2FF] px-3 py-1 text-xs font-semibold text-accent">Recommandé</span>
-                    )}
-                  </div>
-                  <div className="mt-4 flex flex-col gap-2">
-                    <h3 className="text-3xl font-semibold text-night">{plan.name}</h3>
-                    <p className="text-4xl font-bold text-night">
-                      {plan.price} {plan.priceKey && <span className="text-base font-medium text-slate">HT</span>}
-                    </p>
-                    <p className="text-sm text-slate">{plan.priceKey ? plan.subtitle : <em>{plan.subtitle}</em>}</p>
-                  </div>
-                  <div className="my-6 h-px w-full bg-border" />
-                  <ul className="space-y-3 text-sm text-night">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-3">
-                        {plan.ctaLink ? (
-                          <MessageCircle className="h-4 w-4 text-accent" />
-                        ) : (
-                          <Check className="h-4 w-4 text-success" />
-                        )}
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  {plan.note && <p className="mt-4 text-sm text-slate">{plan.note}</p>}
-                  <div className="mt-6">
-                    {plan.priceKey ? (
-                      <CheckoutButton
-                        label={plan.priceKey === "subscription" ? "Démarrer mon abonnement" : "Acheter maintenant"}
-                        priceKey={plan.priceKey}
-                        variant={plan.priceKey === "subscription" ? "outline" : "primary"}
-                      />
-                    ) : (
-                      <Link
-                        href={plan.ctaLink!}
-                        target="_blank"
-                        className="block w-full rounded-2xl border border-accent px-5 py-3 text-center text-sm font-semibold text-accent transition hover:bg-indigo-50"
-                      >
-                        Réserver mon appel gratuit →
-                      </Link>
-                    )}
-                  </div>
-                  {!plan.priceKey && <p className="mt-3 text-center text-xs text-[#94A3B8]">⏱ Disponible sous 24h</p>}
-                </div>
-              ))}
-            </div>
+            <PricingPlans calendlyUrl={calendlyUrl} />
             <div className="mt-8 text-center text-sm text-slate">
               <p>
-                Pas sûr ? <a href="#audit" className="text-accent">Commencez par l'audit gratuit →</a>
+                Pas sûr ? <a href="#hero" className="text-accent">Commencez par l'analyse gratuite →</a>
               </p>
             </div>
           </FadeIn>

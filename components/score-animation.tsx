@@ -30,13 +30,15 @@ export function ScoreAnimation() {
   }, [bar]);
 
   return (
-    <div className="w-full rounded-3xl border border-border bg-white p-6 shadow-glow">
+    <div className="w-full min-w-[220px] rounded-3xl border border-border bg-white p-5 shadow-glow">
       <div className="text-xs font-semibold uppercase tracking-[0.3em] text-slate">Score moyen PME FR</div>
       <div className="mt-4 flex items-end gap-3">
         <div className="text-5xl font-bold text-night">{score}</div>
         <div className="text-base font-medium text-slate">/100</div>
       </div>
-      <p className="text-[11px] font-semibold text-danger">⚠ Zone critique</p>
+      <span className="mt-2 inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-[11px] font-semibold text-red-600">
+        ⚠ Zone critique
+      </span>
       <div className="relative mt-3 h-2 w-full rounded-full bg-[#F1F5F9]">
         <motion.div
           className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-danger to-warning"
