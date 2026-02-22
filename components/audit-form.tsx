@@ -83,7 +83,7 @@ export function AuditForm() {
   };
 
   const inputBase =
-    "mt-2 w-full rounded-xl border border-border bg-white px-4 py-3 text-base text-night transition focus:border-accent focus:ring-4 focus:ring-accent/10 focus:outline-none";
+    "mt-2 w-full rounded-xl border border-border bg-white px-4 py-3 text-base text-night transition focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

@@ -12,6 +12,15 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
 html,
 body {
   padding: 0;
@@ -19,6 +28,7 @@ body {
   font-family: "Inter", sans-serif;
   background: #ffffff;
   color: #0f172a;
+  line-height: 1.7;
 }
 
 a {
@@ -32,4 +42,17 @@ body {
 
 .section {
   padding: 4rem 0;
+}
+
+.hero-texture {
+  position: relative;
+}
+
+.hero-texture::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.3'%3E%3Ccircle cx='2' cy='2' r='1'/%3E%3Ccircle cx='42' cy='32' r='1'/%3E%3Ccircle cx='12' cy='52' r='1'/%3E%3Ccircle cx='72' cy='12' r='1'/%3E%3Ccircle cx='62' cy='62' r='1'/%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.12;
+  pointer-events: none;
 }

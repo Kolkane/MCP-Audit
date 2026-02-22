@@ -1,5 +1,19 @@
 import Link from "next/link";
-import { ArrowRight, Briefcase, Building2, Check, Quote, ShoppingBag, Sparkles, Star, Stethoscope, User, Wrench, X } from "lucide-react";
+import {
+  ArrowRight,
+  Briefcase,
+  Building2,
+  Check,
+  Quote,
+  ShieldCheck,
+  ShoppingBag,
+  Sparkles,
+  Star,
+  Stethoscope,
+  User,
+  Wrench,
+  X
+} from "lucide-react";
 import { FadeIn } from "@/components/fade-in";
 import { ScoreAnimation } from "@/components/score-animation";
 import { AuditForm } from "@/components/audit-form";
@@ -129,7 +143,7 @@ export default function Page() {
     <main className="bg-background text-night">
       <Navbar />
       {/* HERO */}
-      <section id="hero" className="relative bg-gradient-to-br from-white to-[#EEF2FF] pt-32">
+      <section id="hero" className="hero-texture relative bg-gradient-to-br from-white to-[#EEF2FF] pt-32">
         <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 lg:flex-row lg:items-center">
           <FadeIn>
             <div className="text-center lg:text-left">
@@ -140,7 +154,7 @@ export default function Page() {
                 Votre site existe sur Google. Mais existe-t-il pour ChatGPT, Perplexity et les agents IA ?
               </h1>
               <p className="mx-auto mt-6 max-w-2xl text-lg text-slate">
-                Obtenez votre score de visibilité IA gratuitement en 24h, puis laissez notre agent corriger vos données pour monopoliser les recommandations IA.
+                Obtenez votre score de visibilité IA gratuitement en 24h, puis laissez notre agent corriger vos données et apparaître en priorité sur ChatGPT, Perplexity et tous les agents IA.
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
                 <a
@@ -191,18 +205,19 @@ export default function Page() {
         <div className="mx-auto max-w-6xl px-6">
           <FadeIn>
             <h2 className="text-3xl font-semibold">Comment ça marche</h2>
-            <div className="mt-10 flex flex-col gap-8 lg:flex-row lg:items-start">
+            <div className="mt-10 flex flex-col gap-10 lg:flex-row lg:items-start">
               {steps.map((step, index) => (
-                <div key={step} className="relative flex-1">
+                <div key={step} className="relative flex flex-1 flex-col items-start gap-3">
                   {index < steps.length - 1 && (
-                    <div className="absolute top-6 hidden w-full border-t-2 border-dashed border-accent/30 lg:block" />
+                    <div className="absolute left-[52px] right-0 top-5 hidden border-t-2 border-dashed border-indigo-200 lg:block" />
                   )}
                   <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-lg font-semibold text-white">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#4F46E5] text-lg font-bold text-white">
                       {index + 1}
                     </div>
-                    <p className="text-base font-medium text-night">{step}</p>
+                    <p className="text-base font-semibold text-night">{step.split(" → ")[0]}</p>
                   </div>
+                  <p className="max-w-[180px] text-sm text-slate">{step.split(" → ")[1]}</p>
                 </div>
               ))}
             </div>
@@ -217,12 +232,25 @@ export default function Page() {
             <div className="relative">
               <div className="absolute inset-0 -rotate-2 rounded-3xl border border-border bg-white opacity-40"></div>
               <div className="relative rounded-3xl border border-border bg-white p-8 shadow-card">
-                <div className="rounded-2xl bg-accent p-4 text-white">
-                  <p className="text-sm uppercase tracking-[0.3em]">Rapport Agentable — Exemple</p>
-                  <p className="text-4xl font-semibold">Score 34/100</p>
+                <div className="relative flex items-center justify-between overflow-hidden rounded-2xl bg-gradient-to-br from-[#4F46E5] to-accent p-4 text-white">
+                  <div>
+                    <p className="text-sm uppercase tracking-[0.3em]">Rapport Agentable — Exemple</p>
+                    <div className="mt-2 flex items-baseline gap-2">
+                      <span className="text-5xl font-black">34</span>
+                      <span className="text-xl text-white/70">/100</span>
+                    </div>
+                    <span className="mt-3 inline-flex items-center rounded-full bg-red-500/20 px-3 py-1 text-xs font-semibold text-red-200">
+                      ⚠ Score critique
+                    </span>
+                  </div>
+                  <ShieldCheck className="h-8 w-8 text-white/50" />
+                  <div
+                    className="pointer-events-none absolute inset-0 rounded-2xl opacity-[0.4]"
+                    style={{ backgroundImage: "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.2) 0%, transparent 60%)" }}
+                  />
                 </div>
-                <div className="mt-6 h-3 w-full rounded-full bg-surface">
-                  <div className="h-full w-1/3 rounded-full bg-danger" />
+                <div className="mt-6 h-2 w-full rounded-full bg-surface">
+                  <div className="h-full w-1/3 rounded-full bg-gradient-to-r from-danger to-warning" />
                 </div>
                 <ul className="mt-6 space-y-3 text-slate">
                   <li className="flex items-center gap-3 text-base text-danger">
@@ -275,13 +303,16 @@ export default function Page() {
 
       {/* FORM */}
       <section className="section" id="audit">
-        <div className="mx-auto max-w-5xl rounded-[32px] bg-gradient-to-br from-accent to-accentLight p-1">
-          <div className="rounded-[30px] bg-white p-10">
-            <FadeIn>
-              <h2 className="text-3xl font-semibold text-night">Obtenez votre score gratuit</h2>
-              <AuditForm />
-            </FadeIn>
-          </div>
+        <div className="mx-auto max-w-5xl rounded-[30px] border-2 border-[#E2E8F0] bg-white p-10 shadow-[0_20px_60px_rgba(99,102,241,0.12)]">
+          <FadeIn>
+            <div className="mb-4 flex justify-center">
+              <span className="rounded-full bg-green-50 px-4 py-2 text-xs font-semibold text-green-700">
+                🔒 Audit 100% gratuit — aucune CB requise
+              </span>
+            </div>
+            <h2 className="text-3xl font-semibold text-night text-center">Obtenez votre score gratuit</h2>
+            <AuditForm />
+          </FadeIn>
         </div>
       </section>
 
@@ -352,13 +383,19 @@ export default function Page() {
               {testimonials.map((item, index) => (
                 <div
                   key={item.label}
-                  className={`rounded-2xl border border-border bg-white p-6 shadow-sm md:${index === 0 ? "-rotate-1" : index === 2 ? "rotate-1" : "rotate-0"}`}
+                  className={`rounded-2xl border border-border bg-white p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] md:${index === 0 ? "-rotate-1" : index === 2 ? "rotate-1" : "rotate-0"}`}
                 >
-                  <Quote className="h-12 w-12 text-[#EEF2FF]" />
-                  <p className="mt-4 text-base italic text-night">“{item.quote}”</p>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="rounded-full bg-success/10 px-3 py-1 text-xs font-semibold text-success">{item.delta}</span>
-                    <p className="text-sm text-slate">{item.label}</p>
+                  <div className="text-6xl font-serif leading-none text-indigo-100">“</div>
+                  <p className="mt-2 text-base font-medium italic text-night">{item.quote}</p>
+                  <div className="my-4 h-px w-full border-t border-[#F1F5F9]" />
+                  <div className="flex items-center justify-between">
+                    <span className="rounded-full border border-green-200 bg-green-50 px-3 py-1 text-sm font-bold text-green-700">
+                      {item.delta} ↑
+                    </span>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-night">{item.label.split(" — ")[0]}</p>
+                      <p className="text-xs text-slate">{item.label.split(" — ")[1]}</p>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -372,12 +409,14 @@ export default function Page() {
         <div className="mx-auto max-w-3xl px-6">
           <FadeIn>
             {faq.map((item) => (
-              <details key={item.question} className="border-b border-border py-4">
-                <summary className="flex cursor-pointer items-center justify-between text-base font-semibold text-night">
+              <details key={item.question} className="group border-b border-[#F1F5F9] py-5">
+                <summary className="flex cursor-pointer items-center justify-between text-base font-semibold text-night transition hover:text-accent">
                   {item.question}
-                  <span className="text-accent">+</span>
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#EEF2FF] text-sm font-bold text-indigo-500 transition group-open:rotate-45">
+                    +
+                  </span>
                 </summary>
-                <p className="mt-3 text-sm text-slate">{item.answer}</p>
+                <p className="pb-4 pt-3 text-sm leading-relaxed text-slate">{item.answer}</p>
               </details>
             ))}
           </FadeIn>
@@ -390,13 +429,20 @@ export default function Page() {
           <FadeIn>
             <h2 className="text-4xl font-semibold">Si vous avez un site, vous méritez d'être visible partout — y compris sur les IA.</h2>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
-              <a href="#audit" className="rounded-xl bg-white px-6 py-4 text-base font-semibold text-accent">
+              <a
+                href="#audit"
+                className="rounded-xl bg-white px-6 py-4 text-base font-semibold text-[#4F46E5] shadow-[0_4px_16px_rgba(0,0,0,0.15)] transition hover:bg-indigo-50"
+              >
                 Je veux mon score maintenant
               </a>
-              <a href="#pricing" className="rounded-xl border border-white px-6 py-4 text-base font-semibold text-white">
+              <a
+                href="#pricing"
+                className="rounded-xl border-2 border-white/60 px-6 py-4 text-base font-semibold text-white transition hover:border-white hover:bg-white/10"
+              >
                 Voir les offres
               </a>
             </div>
+            <p className="mt-4 text-sm text-white/70">✓ Sans engagement · ✓ Résultats en 48h · ✓ 100% automatique</p>
           </FadeIn>
         </div>
       </section>

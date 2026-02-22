@@ -13,10 +13,12 @@ const links = [
 export function Navbar() {
   const [hidden, setHidden] = useState(false);
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() ?? 0;
+    setScrolled(latest > 50);
     if (latest > previous && latest > 80) {
       setHidden(true);
       setOpen(false);
@@ -25,13 +27,12 @@ export function Navbar() {
     }
   });
 
+  const navClasses = `fixed inset-x-0 top-0 z-50 border-b backdrop-blur-sm transition duration-200 ${
+    scrolled ? "border-[#E2E8F0] bg-white/95 shadow-[0_2px_16px_rgba(0,0,0,0.06)]" : "border-transparent bg-white/95"
+  }`;
+
   return (
-    <motion.nav
-      initial={{ y: 0 }}
-      animate={{ y: hidden ? -80 : 0 }}
-      transition={{ duration: 0.3 }}
-      className="fixed inset-x-0 top-0 z-50 border-b border-border/70 bg-white/95 backdrop-blur"
-    >
+    <motion.nav initial={{ y: 0 }} animate={{ y: hidden ? -80 : 0 }} transition={{ duration: 0.3 }} className={navClasses}>
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <a href="#hero" className="text-lg font-semibold text-night">
           Agentable<span className="text-accent">.</span>
