@@ -83,6 +83,7 @@ const personas = [
   { label: "E-commerce", benefit: "Vos produits lus par les agents IA", icon: ShoppingBag }
 ];
 
+
 const testimonials = [
   {
     label: "Freelance UX · Paris",
@@ -120,7 +121,7 @@ const faq = [
   },
   {
     question: "Sous quel délai mon score s'améliore ?",
-    answer: "48h pour tout pack Starter ou Pro : tu reçois le rapport final avec la nouvelle note garantie."
+    answer: "48h après paiement de l'activation. Tu reçois le rapport final avec la nouvelle note garantie >80/100."
   },
   {
     question: "Ça fonctionne pour mon secteur ?",
@@ -342,17 +343,21 @@ export default function Page() {
         </div>
       </section>
 
-      {/* FORM */}
-      <section className="section" id="audit">
-        <div className="mx-auto max-w-5xl rounded-[30px] border-2 border-[#E2E8F0] bg-white p-10 shadow-[0_20px_60px_rgba(99,102,241,0.12)]">
+      {/* REPORT EMAIL */}
+      <section className="section" id="report-email">
+        <div className="mx-auto max-w-4xl rounded-3xl border border-[#E2E8F0] bg-white p-10 text-center shadow-[0_20px_60px_rgba(99,102,241,0.12)]">
           <FadeIn>
-            <div className="mb-4 flex justify-center">
-              <span className="rounded-full bg-green-50 px-4 py-2 text-xs font-semibold text-green-700">
-                🔒 Audit 100% gratuit — aucune CB requise
-              </span>
+            <h2 className="text-3xl font-semibold text-night">Vous préférez un rapport complet ?</h2>
+            <p className="mt-3 text-base text-slate">Laissez votre email — nous vous envoyons l'analyse complète sous 24h.</p>
+            <div className="mt-8 flex flex-col gap-4 md:flex-row">
+              <input
+                type="email"
+                placeholder="prenom@entreprise.com"
+                className="flex-1 rounded-xl border border-border px-4 py-3 text-night focus:border-accent focus:outline-none"
+              />
+              <button className="rounded-xl bg-accent px-6 py-3 text-base font-semibold text-white">Recevoir le rapport complet →</button>
             </div>
-            <h2 className="text-3xl font-semibold text-night text-center">Obtenez votre score gratuit</h2>
-            <AuditForm />
+            <p className="mt-3 text-sm text-slate">✓ Gratuit · ✓ 24h · ✓ RGPD</p>
           </FadeIn>
         </div>
       </section>
@@ -430,7 +435,7 @@ export default function Page() {
             <h2 className="text-4xl font-semibold">Si vous avez un site, vous méritez d'être visible partout — y compris sur les IA.</h2>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <a
-                href="#audit"
+                href="#hero"
                 className="rounded-xl bg-white px-6 py-4 text-base font-semibold text-[#4F46E5] shadow-[0_4px_16px_rgba(0,0,0,0.15)] transition hover:bg-indigo-50"
               >
                 Je veux mon score maintenant
