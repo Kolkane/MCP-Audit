@@ -189,25 +189,23 @@ export default function Page() {
 
       {/* PROCESS */}
       <section className="section" id="process">
-        <div className="mx-auto max-w-6xl px-6">
+        <div className="mx-auto max-w-3xl px-6">
           <FadeIn>
-            <h2 className="text-3xl font-semibold">Comment ça marche</h2>
-            <div className="mt-10 grid gap-6 md:grid-cols-2">
-              {steps.map((step) => {
-                const Icon = step.icon;
-                return (
-                  <div key={step.number} className="flex h-full flex-col rounded-2xl border border-[#E2E8F0] bg-white p-6">
-                    <span className="w-fit rounded-full bg-[#4F46E5] px-2 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-white">
+            <h2 className="text-3xl font-semibold text-center">Comment ça marche</h2>
+            <div className="relative mt-10">
+              <div className="absolute left-[15px] top-4 bottom-4 border-l-2 border-dashed border-indigo-200" />
+              <div className="space-y-8">
+                {steps.map((step, index) => (
+                  <div key={step.number} className="relative pl-12">
+                    <div className="absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#4F46E5] text-xs font-bold text-white">
                       {step.number}
-                    </span>
-                    <div className="mt-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50 text-indigo-400">
-                      <Icon className="h-7 w-7" />
                     </div>
-                    <h3 className="mt-4 text-base font-semibold text-night">{step.title}</h3>
-                    <p className="mt-2 text-sm text-slate leading-relaxed">{step.description}</p>
+                    <h3 className="text-sm font-semibold text-night">{step.title}</h3>
+                    <p className="mt-1 text-xs text-slate">{step.description}</p>
                   </div>
-                );
-              })}
+                ))}
+              </div>
+              <div className="mt-6 flex justify-center text-indigo-400">↓</div>
             </div>
           </FadeIn>
         </div>
