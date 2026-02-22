@@ -416,8 +416,11 @@ export default function Page() {
         <div className="mx-auto max-w-6xl px-6">
           <FadeIn>
             <div className="text-center">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent">Passez à l'action après votre audit</p>
-              <h2 className="mt-3 text-3xl font-semibold text-night">Mise en conformité automatique sous 48h</h2>
+              <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent">Tarifs</span>
+              <h2 className="mt-3 text-3xl font-bold text-night">Simple. Transparent. Personnalisé.</h2>
+              <p className="mx-auto mt-2 max-w-lg text-base text-slate">
+                Votre prix d'activation est calculé automatiquement selon votre score. Entrez votre URL pour le connaître.
+              </p>
             </div>
             <PricingPlans calendlyUrl={calendlyUrl} />
             <div className="mt-8 text-center text-sm text-slate">

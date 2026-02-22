@@ -202,15 +202,15 @@ export function HeroAnalyzer() {
                 {result.stripePrice && (
                   <CheckoutButton
                     label={`Lancer ma mise en conformité — ${activationPrice}€ HT`}
-                    priceId={result.stripePrice}
-                    mode="payment"
+                    activationPriceId={result.stripePrice}
+                    addMaintenance={false}
                   />
                 )}
-                {result.stripeMaintenance && (
+                {result.stripePrice && result.stripeMaintenance && (
                   <CheckoutButton
-                    label={`Ajouter la maintenance (${maintenancePrice}€ HT/mois)`}
-                    priceId={result.stripeMaintenance}
-                    mode="subscription"
+                    label={`Inclure la maintenance (${maintenancePrice}€ HT/mois)`}
+                    activationPriceId={result.stripePrice}
+                    addMaintenance
                     variant="outline"
                   />
                 )}

@@ -10,31 +10,47 @@ const priceMap: Record<string, string | undefined> = {
 
 export async function POST(request: Request) {
   try {
-    const { plan, priceId, mode } = await request.json();
+    const body = await request.json();
     const origin = request.headers.get("origin") || "https://agentable.vercel.app";
     const stripe = getStripe();
 
-    if (priceId) {
+    if (body.activationPrice) {
+      const lineItems = [{ price: body.activationPrice as string, quantity: 1 }];
+      if (body.addMaintenance && process.env.STRIPE_PRICE_MAINTENANCE) {
+        lineItems.push({ price: process.env.STRIPE_PRICE_MAINTENANCE, quantity: 1 });
+      }
+
       const session = await stripe.checkout.sessions.create({
-        mode: mode === "subscription" ? "subscription" : "payment",
-        line_items: [{ price: priceId, quantity: 1 }],
-        success_url: `${origin}/merci`,
-        cancel_url: `${origin}#pricing`
+        mode: body.addMaintenance ? "subscription" : "payment",
+        line_items: lineItems,
+        success_url: `${origin}/merci?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${origin}/`,
+        ...(body.addMaintenance
+          ? {
+              subscription_data: {
+                metadata: {
+                  activation: body.activationPrice
+                }
+              }
+            }
+          : {})
       });
+
       return NextResponse.json({ url: session.url });
     }
 
+    const { plan } = body;
     const mappedPriceId = priceMap[plan as string];
     if (!mappedPriceId) {
       return NextResponse.json({ error: "Plan inconnu" }, { status: 400 });
     }
 
-    const isSubscription = plan === "subscription";
+    const isSubscription = plan === "maintenance";
     const session = await stripe.checkout.sessions.create({
       mode: isSubscription ? "subscription" : "payment",
       line_items: [{ price: mappedPriceId, quantity: 1 }],
-      success_url: `${origin}/merci`,
-      cancel_url: `${origin}#pricing`,
+      success_url: `${origin}/merci?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/`,
       metadata: { plan }
     });
 
