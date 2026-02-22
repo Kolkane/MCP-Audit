@@ -215,89 +215,140 @@ export default function Page() {
       <section className="section" id="report">
         <div className="mx-auto max-w-5xl px-6">
           <FadeIn>
-            <div className="relative max-w-2xl rotate-1">
-              <div className="absolute inset-0 -rotate-3 scale-95 rounded-3xl bg-indigo-100 opacity-70"></div>
-              <div className="relative overflow-hidden rounded-3xl bg-white text-night shadow-[0_20px_60px_rgba(99,102,241,0.15)]">
-                <div className="flex items-center justify-between bg-gradient-to-br from-[#4F46E5] to-accent p-6 text-white">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-white/70">Rapport Agentable — Exemple</p>
-                    <p className="text-lg font-bold">monsite-exemple.fr</p>
-                  </div>
-                  <ShieldCheck className="h-8 w-8 text-white/50" />
+            <div className="flex flex-col gap-12 md:flex-row md:items-center">
+              <div className="flex-1 space-y-4">
+                <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent">Exemple de rapport</span>
+                <h3 className="text-3xl font-bold text-night leading-tight">Voici ce que vous recevez en 60 secondes</h3>
+                <p className="text-base text-slate">
+                  Notre agent analyse votre site en temps réel et génère un rapport personnalisé avec :
+                </p>
+                <ul className="space-y-2 text-sm text-night">
+                  {[
+                    "Score global /100 avec détail par critère",
+                    "Identification de toutes vos lacunes",
+                    "Estimation de la valeur business perdue",
+                    "Prix d'activation calculé sur mesure"
+                  ].map((feature) => (
+                    <li key={feature} className="flex items-center gap-2 text-accent">
+                      <Check className="h-4 w-4" />
+                      <span className="text-night">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="pt-3">
+                  <p className="text-sm font-semibold text-night">Et par email sous 24h :</p>
+                  <ul className="mt-2 space-y-2 text-sm">
+                    <li className="flex items-center gap-2 text-accent">
+                      <Check className="h-4 w-4" />
+                      <span className="text-night">Rapport PDF complet 6 pages</span>
+                    </li>
+                    <li className="flex items-center gap-2 text-accent">
+                      <Check className="h-4 w-4" />
+                      <span className="text-night">Instructions d'implémentation pas à pas</span>
+                    </li>
+                  </ul>
                 </div>
-                <div className="p-6">
-                  <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="relative h-[120px] w-[120px]">
-                        <svg width="120" height="120">
-                          <circle cx="60" cy="60" r="52" stroke="#F1F5F9" strokeWidth="8" fill="none" />
-                          <circle
-                            cx="60"
-                            cy="60"
-                            r="52"
-                            stroke="#EF4444"
-                            strokeWidth="8"
-                            fill="none"
-                            strokeDasharray={2 * Math.PI * 52}
-                            strokeDashoffset={2 * Math.PI * 52 - (34 / 100) * 2 * Math.PI * 52}
-                            strokeLinecap="round"
-                            transform="rotate(-90 60 60)"
-                          />
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className="text-3xl font-black text-night">34</span>
-                          <span className="text-sm text-slate">/100</span>
+                <a
+                  href="#hero"
+                  className="inline-flex items-center justify-center rounded-2xl bg-accent px-6 py-3 text-sm font-semibold text-white"
+                >
+                  Analyser mon site gratuitement →
+                </a>
+                <p className="text-xs text-slate">⚡ Résultat en 60 secondes · 100% gratuit</p>
+              </div>
+              <div className="flex-1">
+                <div className="relative rotate-1">
+                  <div className="absolute inset-0 -rotate-3 scale-95 rounded-3xl bg-indigo-100 opacity-70"></div>
+                  <div className="relative overflow-hidden rounded-3xl bg-white text-night shadow-[0_20px_60px_rgba(99,102,241,0.15)]">
+                    <div className="flex items-center justify-between bg-gradient-to-br from-[#4F46E5] to-accent p-6 text-white">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.3em] text-white/70">Rapport Agentable — Exemple</p>
+                        <p className="text-lg font-bold">monsite-exemple.fr</p>
+                      </div>
+                      <ShieldCheck className="h-8 w-8 text-white/50" />
+                    </div>
+                    <div className="p-6">
+                      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="relative h-[120px] w-[120px]">
+                            <svg width="120" height="120">
+                              <circle cx="60" cy="60" r="52" stroke="#F1F5F9" strokeWidth="8" fill="none" />
+                              <circle
+                                cx="60"
+                                cy="60"
+                                r="52"
+                                stroke="#EF4444"
+                                strokeWidth="8"
+                                fill="none"
+                                strokeDasharray={2 * Math.PI * 52}
+                                strokeDashoffset={2 * Math.PI * 52 - (34/100) * 2 * Math.PI * 52}
+                                strokeLinecap="round"
+                                transform="rotate(-90 60 60)"
+                              />
+                            </svg>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                              <span className="text-3xl font-black text-night">34</span>
+                              <span className="text-sm text-slate">/100</span>
+                            </div>
+                          </div>
+                          <span className="rounded-full bg-red-50 px-3 py-1 text-sm font-semibold text-red-600">⚠ Score critique</span>
+                        </div>
+                        <p className="max-w-xs text-sm text-slate">Votre site est quasi-invisible pour les agents IA.</p>
+                      </div>
+                      <div className="my-6 h-px w-full border-t border-[#F1F5F9]" />
+                      <div className="space-y-3">
+                        {[
+                          { label: "Schema.org", score: 8 },
+                          { label: "Données NAP", score: 12 },
+                          { label: "Métadonnées", score: 6 },
+                          { label: "FAQ structurée", score: 4 },
+                          { label: "Vitesse page", score: 15 },
+                          { label: "Citations externes", score: 5 }
+                        ].map((item) => (
+                          <div key={item.label} className="flex items-center gap-4 border-b border-[#F8F9FF] pb-2">
+                            <div className="w-32 text-sm font-semibold text-night">{item.label}</div>
+                            <div className="h-2 w-[160px] rounded-full bg-[#F1F5F9]">
+                              <div
+                                className="h-full rounded-full"
+                                style={{
+                                  width: `${(item.score / 20) * 100}%`,
+                                  background:
+                                    item.score >= 14 ? "#22C55E" : item.score >= 9 ? "#F97316" : "#EF4444"
+                                }}
+                              />
+                            </div>
+                            <div className="w-16 text-right text-xs text-slate">{item.score}/20</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-6">
+                        <p className="text-sm font-semibold text-night">Problèmes critiques détectés :</p>
+                        <ul className="mt-2 space-y-2 text-sm text-night">
+                          {[
+                            "Vos données schema.org sont absentes",
+                            "Les agents IA ne retrouvent pas vos coordonnées",
+                            "Meta description introuvable pour ChatGPT"
+                          ].map((issue) => (
+                            <li key={issue} className="flex items-start gap-2 text-danger">
+                              <X className="h-4 w-4" />
+                              <span className="text-night">{issue}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                        <div className="flex items-center justify-between">
+                          <span>💸 Valeur business perdue estimée</span>
+                          <span className="text-lg font-bold">2 400€/mois</span>
                         </div>
                       </div>
-                      <span className="rounded-full bg-red-50 px-3 py-1 text-sm font-semibold text-red-600">⚠ Score critique</span>
-                    </div>
-                    <p className="max-w-xs text-sm text-slate">Votre site est quasi-invisible pour les agents IA.</p>
-                  </div>
-                  <div className="my-6 h-px w-full border-t border-[#F1F5F9]" />
-                  <div className="space-y-3">
-                    {[
-                      { label: "Schema.org", score: "8/20", color: "bg-red-500" },
-                      { label: "Données NAP", score: "12/20", color: "bg-orange-400" },
-                      { label: "Métadonnées", score: "6/20", color: "bg-red-500" },
-                      { label: "FAQ structurée", score: "4/20", color: "bg-red-500" },
-                      { label: "Vitesse page", score: "15/20", color: "bg-green-500" },
-                      { label: "Citations externes", score: "5/20", color: "bg-red-500" }
-                    ].map((item) => (
-                      <div key={item.label} className="flex items-center gap-4 border-b border-[#F8F9FF] pb-2">
-                        <div className="flex-1 text-sm font-semibold text-night">{item.label}</div>
-                        <div className="h-1.5 w-20 rounded-full bg-[#F1F5F9]">
-                          <div className="h-full rounded-full" style={{ width: item.score, background: item.color === "bg-green-500" ? "#22C55E" : item.color === "bg-orange-400" ? "#F97316" : "#EF4444" }} />
-                        </div>
-                        <div className="w-16 text-right text-xs text-slate">{item.score}</div>
+                      <div className="mt-4 flex flex-col gap-3 rounded-xl bg-[#F8F9FF] px-4 py-3 text-sm text-slate md:flex-row md:items-center md:justify-between">
+                        <span>Prix d'activation estimé : 349€ HT</span>
+                        <a href="#pricing" className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white">
+                          Corriger mon score →
+                        </a>
                       </div>
-                    ))}
-                  </div>
-                  <div className="mt-6">
-                    <p className="text-sm font-semibold text-night">Problèmes critiques détectés :</p>
-                    <ul className="mt-2 space-y-2 text-sm text-night">
-                      {[
-                        "Vos données schema.org sont absentes",
-                        "Les agents IA ne retrouvent pas vos coordonnées",
-                        "Meta description introuvable pour ChatGPT"
-                      ].map((issue) => (
-                        <li key={issue} className="flex items-start gap-2 text-danger">
-                          <X className="h-4 w-4" />
-                          <span className="text-night">{issue}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-                    <div className="flex items-center justify-between">
-                      <span>💸 Valeur business perdue estimée</span>
-                      <span className="text-lg font-bold">2 400€/mois</span>
                     </div>
-                  </div>
-                  <div className="mt-4 flex flex-col gap-3 rounded-xl bg-[#F8F9FF] px-4 py-3 text-sm text-slate md:flex-row md:items-center md:justify-between">
-                    <span>Prix d'activation estimé : 349€ HT</span>
-                    <a href="#pricing" className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white">
-                      Corriger mon score →
-                    </a>
                   </div>
                 </div>
               </div>
