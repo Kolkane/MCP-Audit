@@ -201,7 +201,7 @@ export function PricingPlans({ calendlyUrl }: { calendlyUrl: string }) {
                   type="button"
                   onClick={handleAnalyze}
                   disabled={!url.trim() || analysisState === "loading"}
-                  className="rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                  className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"
                 >
                   {analysisState === "loading" ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "Analyser →"}
                 </button>

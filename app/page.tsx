@@ -321,7 +321,7 @@ export default function Page() {
                         </div>
                       </div>
                       <div className="mt-4 flex flex-col gap-3 rounded-xl bg-[#F8F9FF] px-4 py-3 text-sm text-slate md:flex-row md:items-center md:justify-between">
-                        <span>Prix d'activation estimé : 349€ HT</span>
+                        <span>Prix d'activation estimé : 590€ HT</span>
                         <a href="#pricing" className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white">
                           Corriger mon score →
                         </a>
@@ -467,7 +467,7 @@ export default function Page() {
             <div className="mt-8 flex flex-col gap-4 md:flex-row">
               <input
                 type="email"
-                placeholder="prenom@entreprise.com"
+                placeholder="votre@email.fr"
                 className="flex-1 rounded-xl border border-border px-4 py-3 text-night focus:border-accent focus:outline-none"
               />
               <button className="rounded-xl bg-accent px-6 py-3 text-base font-semibold text-white">Recevoir le rapport complet →</button>
