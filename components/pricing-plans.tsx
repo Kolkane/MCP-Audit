@@ -27,36 +27,7 @@ export function PricingPlans({ calendlyUrl }: { calendlyUrl: string }) {
     <div className="mx-auto mt-10 flex flex-col gap-6 md:max-w-5xl md:flex-row">
       <div className="flex-1 rounded-3xl border border-[#E2E8F0] bg-white p-8 shadow-sm">
         <div className="text-sm font-semibold uppercase tracking-wide text-slate">Comment votre prix est calculé</div>
-        {!analysis && (
-          <>
-            <p className="mt-2 text-sm text-[#94A3B8]">
-              Notre agent évalue votre site sur 8 critères techniques. Plus votre site nécessite de corrections, plus le travail est important.
-            </p>
-            <div className="mt-6 space-y-3">
-              <div className="flex items-center justify-between rounded-2xl border border-[#BBF7D0] bg-[#F0FDF4] px-4 py-3 text-sm">
-                <div>
-                  <p className="font-semibold text-[#15803D]">● Site bien structuré</p>
-                  <p className="text-xs text-[#4ADE80]">Score supérieur à 60 · Quelques optimisations ciblées</p>
-                </div>
-                <span className="text-base font-black text-[#15803D]">249€ HT</span>
-              </div>
-              <div className="flex items-center justify-between rounded-2xl border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3 text-sm">
-                <div>
-                  <p className="font-semibold text-[#92400E]">● Optimisations modérées</p>
-                  <p className="text-xs text-[#92400E]">Score entre 40 et 60 · Refonte partielle des métadonnées</p>
-                </div>
-                <span className="text-base font-black text-[#92400E]">390€ HT</span>
-              </div>
-              <div className="flex items-center justify-between rounded-2xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm">
-                <div>
-                  <p className="font-semibold text-[#991B1B]">● Refonte complète</p>
-                  <p className="text-xs text-[#991B1B]">Score inférieur à 40 · Restructuration technique complète</p>
-                </div>
-                <span className="text-base font-black text-[#991B1B]">590€ HT</span>
-              </div>
-            </div>
-          </>
-        )}        <p className="mt-2 text-sm text-[#94A3B8]">
+        <p className="mt-2 text-sm text-[#94A3B8]">
           Notre agent évalue votre site sur 8 critères techniques. Plus votre site nécessite de corrections, plus le travail est important.
         </p>
         <div className="mt-6 space-y-3">
