@@ -1,20 +1,21 @@
 import { NextResponse } from "next/server";
 import * as cheerio from "cheerio";
 import { getActivationPrice, MAINTENANCE_PRICE } from "@/lib/pricing";
+import { getSupabaseServerClient } from "@/lib/supabase";
 
 const defaultPrice = getActivationPrice(35);
 const DEFAULT_RESULT = {
+  auditId: null,
   score: 35,
+  level: defaultPrice.label,
   issues: [
     "Aucun schema.org détecté",
     "Coordonnées introuvables pour les IA",
     "Meta description manquante"
   ],
   priceActivation: defaultPrice.price,
-  stripePrice: defaultPrice.stripePrice,
-  level: defaultPrice.label,
   maintenancePrice: MAINTENANCE_PRICE,
-  stripeMaintenance: process.env.STRIPE_PRICE_MAINTENANCE,
+  explanation: "Vos métadonnées sont incomplètes pour les agents IA.",
   lacunes: [
     "Vos données schema.org sont absentes ou incomplètes",
     "Vos coordonnées (NAP) sont illisibles par les agents IA",
@@ -60,22 +61,43 @@ export async function POST(request: Request) {
     const metaScore = evaluateMeta($);
     const faqScore = evaluateFAQ($);
 
-    const speedScore = 15; // heuristique simple pour l'instant
-    const citationScore = 5; // placeholder
+    const speedScore = 15;
+    const citationScore = 5;
 
     const rawScore = schemaScore + napScore + metaScore + faqScore + speedScore + citationScore;
     const score = Math.min(100, Math.round(rawScore));
     const issues = collectIssues({ schemaScore, napScore, metaScore, faqScore });
     const price = getActivationPrice(score);
+    const explanation = issues[0] || "Quelques ajustements sont nécessaires pour être lisible par les agents IA.";
+
+    const supabase = getSupabaseServerClient();
+    const { data: audit, error: insertError } = await supabase
+      .from("analyses")
+      .insert({
+        url: parsed.toString(),
+        score,
+        niveau: price.label,
+        explication: explanation,
+        lacunes: issues
+      })
+      .select("id, created_at")
+      .single();
+
+    if (insertError || !audit) {
+      throw insertError || new Error("Audit insertion failed");
+    }
 
     return NextResponse.json({
+      auditId: audit.id,
       score,
+      level: price.label,
+      niveau: price.label,
       issues,
       priceActivation: price.price,
-      stripePrice: price.stripePrice,
-      level: price.label,
+      prixActivation: price.price,
       maintenancePrice: MAINTENANCE_PRICE,
-      stripeMaintenance: process.env.STRIPE_PRICE_MAINTENANCE,
+      explanation,
+      explication: explanation,
       lacunes: issues,
       timeout: false
     });

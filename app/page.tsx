@@ -425,11 +425,6 @@ export default function Page() {
               </p>
             </div>
             <PricingPlans calendlyUrl={calendlyUrl} />
-            <div className="mt-8 text-center text-sm text-slate">
-              <p>
-                Pas sûr ? <a href="#hero" className="text-accent">Commencez par l'analyse gratuite →</a>
-              </p>
-            </div>
           </FadeIn>
         </div>
       </section>

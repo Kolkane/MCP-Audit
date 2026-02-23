@@ -2,18 +2,17 @@
 
 import { useState } from "react";
 import { Loader2, AlertCircle, Mail } from "lucide-react";
-import { CheckoutButton } from "@/components/checkout-button";
 import { MAINTENANCE_PRICE } from "@/lib/pricing";
 import clsx from "clsx";
 
 interface AnalyzeResponse {
+  auditId: string;
   score: number;
   issues: string[];
   priceActivation: number;
-  stripePrice?: string | null;
   maintenancePrice?: number;
-  stripeMaintenance?: string | null;
   level?: string;
+  explanation?: string;
   timeout?: boolean;
 }
 
@@ -55,6 +54,7 @@ export function HeroAnalyzer() {
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState("");
   const [emailStatus, setEmailStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [checkoutLoading, setCheckoutLoading] = useState<"activation" | "maintenance" | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -104,6 +104,30 @@ export function HeroAnalyzer() {
     } catch (error) {
       console.error(error);
       setEmailStatus("error");
+    }
+  };
+
+  const handleCheckout = async (withMaintenance: boolean) => {
+    if (!result?.auditId) return;
+    setCheckoutLoading(withMaintenance ? "maintenance" : "activation");
+    setError(null);
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ auditId: result.auditId, addMaintenance: withMaintenance })
+      });
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || "Redirection impossible");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Impossible de lancer le paiement pour le moment.");
+    } finally {
+      setCheckoutLoading(null);
     }
   };
 
@@ -199,24 +223,27 @@ export function HeroAnalyzer() {
                 </div>
               </div>
               <div className="mt-6 space-y-3">
-                {result.stripePrice && (
-                  <CheckoutButton
-                    label={`Lancer ma mise en conformité — ${activationPrice}€ HT`}
-                    activationPriceId={result.stripePrice}
-                    addMaintenance={false}
-                  />
-                )}
-                {result.stripePrice && result.stripeMaintenance && (
-                  <CheckoutButton
-                    label={`Inclure la maintenance (${maintenancePrice}€ HT/mois)`}
-                    activationPriceId={result.stripePrice}
-                    addMaintenance
-                    variant="outline"
-                  />
-                )}
+                <button
+                  type="button"
+                  onClick={() => handleCheckout(false)}
+                  className="w-full rounded-2xl bg-accent px-5 py-3 text-sm font-semibold text-white"
+                  disabled={checkoutLoading === "activation"}
+                >
+                  {checkoutLoading === "activation" ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : `Payer ${activationPrice}€ HT →`}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleCheckout(true)}
+                  className="w-full rounded-2xl border border-accent px-5 py-3 text-sm font-semibold text-accent"
+                  disabled={checkoutLoading === "maintenance"}
+                >
+                  {checkoutLoading === "maintenance"
+                    ? <Loader2 className="mx-auto h-5 w-5 animate-spin" />
+                    : `Inclure la maintenance (${maintenancePrice}€ HT/mois) →`}
+                </button>
                 <button
                   onClick={() => setShowEmailForm((prev) => !prev)}
-                  className="w-full rounded-2xl border border-accent px-5 py-3 text-sm font-semibold text-accent transition hover:bg-indigo-50"
+                  className="w-full rounded-2xl border border-accent/40 px-5 py-3 text-sm font-semibold text-accent transition hover:bg-indigo-50"
                 >
                   Recevoir le rapport complet gratuit par email →
                 </button>
@@ -227,10 +254,10 @@ export function HeroAnalyzer() {
                       <div className="mt-1 flex gap-2">
                         <input
                           type="email"
-                          required
                           value={email}
                           onChange={(event) => setEmail(event.target.value)}
                           className="flex-1 rounded-xl border border-border px-3 py-2 focus:border-accent focus:outline-none"
+                          required
                         />
                         <button
                           type="submit"
