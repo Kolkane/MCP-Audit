@@ -173,21 +173,51 @@ function HeroSection() {
   return (
     <section
       id="hero"
-      className="hero-texture relative"
-      style={{ background: "linear-gradient(180deg, #EEF2FF 0%, #F5F7FF 60%, #FFFFFF 100%)" }}
+      className="relative"
+      style={{
+        background: "radial-gradient(ellipse 100% 50% at 50% 0%, rgba(99,102,241,0.10) 0%, rgba(248,250,252,0) 65%)",
+        backgroundColor: "#F8FAFF"
+      }}
     >
-      <div className="mx-auto max-w-4xl px-6 py-20 text-center">
+      <div className="mx-auto max-w-2xl px-6 py-36 text-center">
         <FadeIn>
-          <span className="inline-flex items-center justify-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-indigo-600">
+          <span className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white px-5 py-2 text-xs font-semibold uppercase tracking-[0.5em] text-indigo-600 shadow-sm">
+            <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
             ✦ NOUVEAU — VISIBILITÉ IA POUR TOUS LES SITES
           </span>
-          <h1 className="mt-6 text-4xl font-black leading-tight text-night sm:text-5xl">
-            Votre site existe sur Google. Mais existe-t-il pour ChatGPT, Perplexity et les agents IA ?
+          <h1 className="mt-6 text-4xl font-black leading-tight text-[#0F172A] sm:text-6xl sm:leading-[1.08]">
+            Votre site existe sur Google.
+            <br />
+            Mais existe-t-il pour
+            <br />
+            <span className="text-indigo-600">ChatGPT, Perplexity</span>
+            <br />
+            et les agents IA ?
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-[#64748B]">
+          <p className="mx-auto mt-5 max-w-lg text-xl leading-relaxed text-[#64748B]">
             Entrez votre URL — notre agent analyse votre visibilité IA en 60 secondes, gratuitement.
           </p>
-          <HeroAnalyzer />
+          <div className="mx-auto mt-10 max-w-xl">
+            <div className="flex flex-col gap-2 rounded-3xl border-2 border-[#E2E8F0] bg-white p-2 shadow-[0_8px_32px_rgba(0,0,0,0.08)] transition focus-within:border-indigo-400 sm:flex-row sm:items-center">
+              <HeroAnalyzer />
+            </div>
+          </div>
+          <div className="mt-5 flex flex-col gap-3 text-sm text-[#64748B] sm:flex-row sm:items-center sm:justify-center sm:gap-8">
+            <div className="flex items-center justify-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-green-500" />
+              Score moyen PME FR : 23/100
+            </div>
+            <div className="hidden h-4 w-px bg-[#E2E8F0] sm:block" />
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-amber-500 text-base">⚡</span>
+              Résultat en 60 secondes
+            </div>
+            <div className="hidden h-4 w-px bg-[#E2E8F0] sm:block" />
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-indigo-500 text-base">🔒</span>
+              100% gratuit
+            </div>
+          </div>
         </FadeIn>
       </div>
     </section>
