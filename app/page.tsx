@@ -27,7 +27,6 @@ import {
 } from "lucide-react";
 
 import { FadeIn } from "@/components/fade-in";
-import { ScoreAnimation } from "@/components/score-animation";
 import { Navbar } from "@/components/navbar";
 import { HeroAnalyzer } from "@/components/hero-analyzer";
 import { PricingPlans } from "@/components/pricing-plans";
@@ -172,8 +171,6 @@ function MainPage() {
 }
 
 function HeroSection() {
-  const { analysisState } = useHeroAnalyzer();
-
   return (
     <section
       id="hero"
@@ -193,13 +190,6 @@ function HeroSection() {
           </p>
           <HeroAnalyzer />
         </FadeIn>
-        {analysisState === "idle" && (
-          <FadeIn>
-            <div className="mt-12 flex justify-center">
-              <ScoreAnimation />
-            </div>
-          </FadeIn>
-        )}
       </div>
     </section>
   );
