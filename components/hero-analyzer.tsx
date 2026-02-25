@@ -151,7 +151,7 @@ export function HeroAnalyzer() {
       )}
 
       {analysisState === "loading" && (
-        <LoadingPanel url={url} message={LOADING_MESSAGES[loadingMessageIndex]} progress={progress} />
+        <LoadingPanel url={url} progress={progress} />
       )}
 
       {analysisState === "done" && result && (
