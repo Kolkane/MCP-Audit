@@ -4,18 +4,30 @@ import { createContext, useContext, useState, ReactNode } from "react";
 
 export type AnalyzeResponse = {
   auditId: string | null;
+  url?: string;
   score: number;
   issues: string[];
   priceActivation: number;
   maintenancePrice?: number;
   level?: string;
+  niveau?: string;
   explanation?: string;
+  criteresDetail?: {
+    schemaOrg: number;
+    nap: number;
+    metadata: number;
+    faq: number;
+    vitesse: number;
+    citations: number;
+  };
+  valeurPerdue?: number;
   timeout?: boolean;
 };
 
 type AnalysisState = "idle" | "loading" | "done";
 
 interface HeroAnalyzerContextValue {
+  reset: () => void;
   url: string;
   setUrl: (value: string) => void;
   result: AnalyzeResponse | null;
@@ -60,9 +72,16 @@ export function HeroAnalyzerProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const reset = () => {
+    setUrl("");
+    setResult(null);
+    setAnalysisState("idle");
+    setError(null);
+  };
+
   return (
     <HeroAnalyzerContext.Provider
-      value={{ url, setUrl, result, analysisState, error, analyze, setError }}
+      value={{ url, setUrl, result, analysisState, error, analyze, setError, reset }}
     >
       {children}
     </HeroAnalyzerContext.Provider>

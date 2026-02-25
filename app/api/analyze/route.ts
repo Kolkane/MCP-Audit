@@ -15,6 +15,24 @@ const DEFAULT_ISSUES = [
   "Vos métadonnées ne sont pas optimisées pour ChatGPT"
 ];
 
+const CRITERIA_LABELS = [
+  { key: "schema", label: "Schema.org" },
+  { key: "nap", label: "Données NAP" },
+  { key: "meta", label: "Métadonnées" },
+  { key: "faq", label: "FAQ structurée" },
+  { key: "speed", label: "Vitesse page" },
+  { key: "citations", label: "Citations externes" }
+] as const;
+
+const DEFAULT_CRITERES_DETAIL = {
+  schemaOrg: 10,
+  nap: 10,
+  metadata: 10,
+  faq: 10,
+  vitesse: 10,
+  citations: 10
+};
+
 const FALLBACK_EXPLANATION = "Analyse indisponible pour l'instant. Nous avons attribué un score de précaution.";
 
 export async function POST(request: Request) {
@@ -54,11 +72,12 @@ export async function POST(request: Request) {
 
     const { html, timedOut } = await fetchHtmlWithTimeout(parsed.toString());
 
-    const evaluation = html ? evaluateSite(html) : getFallbackEvaluation();
+    const evaluation = html ? evaluateSite(html, parsed) : getFallbackEvaluation();
     const pricing = getPricing(evaluation.score);
     const explanation = evaluation.timeout && evaluation.score === FALLBACK_SCORE
       ? FALLBACK_EXPLANATION
       : evaluation.issues[0] || "Votre site est déjà lisible par la plupart des agents IA.";
+    const valeurPerdue = Math.max(0, Math.round((100 - evaluation.score) * 120));
 
     const { data: audit, error: insertError } = await supabase
       .from("analyses")
@@ -80,6 +99,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       auditId: audit.id,
+      url: parsed.toString(),
       score: evaluation.score,
       level: pricing.label,
       niveau: pricing.niveau,
@@ -90,6 +110,8 @@ export async function POST(request: Request) {
       explanation,
       explication: explanation,
       lacunes: evaluation.issues,
+      criteresDetail: evaluation.criteresDetail ?? DEFAULT_CRITERES_DETAIL,
+      valeurPerdue,
       timeout: timedOut || evaluation.timeout
     });
   } catch (error) {
@@ -126,27 +148,50 @@ async function fetchHtmlWithTimeout(url: string) {
   }
 }
 
-function evaluateSite(html: string) {
+type CriteriaScoreMap = Record<(typeof CRITERIA_LABELS)[number]["key"], number>;
+
+function evaluateSite(html: string, targetUrl?: URL) {
   const $ = cheerio.load(html);
 
-  const schemaOk = hasValidSchema($);
-  const napOk = hasNAP($);
-  const metaOk = hasMetadata($);
-  const faqOk = hasFAQ($);
+  const criteria: CriteriaScoreMap = {
+    schema: scoreSchema($),
+    nap: scoreNAP($),
+    meta: scoreMetadata($),
+    faq: scoreFAQ($),
+    speed: scoreSpeed(html.length),
+    citations: scoreCitations($, targetUrl?.hostname)
+  };
 
-  const score = (schemaOk ? 25 : 0) + (napOk ? 25 : 0) + (metaOk ? 25 : 0) + (faqOk ? 25 : 0);
+  const rawScore = Object.values(criteria).reduce((sum, value) => sum + value, 0);
+  const normalizedScore = Math.max(0, Math.min(100, Math.round((rawScore / 120) * 100)));
 
   const issues: string[] = [];
-  if (!schemaOk) issues.push(DEFAULT_ISSUES[0]);
-  if (!napOk) issues.push(DEFAULT_ISSUES[1]);
-  if (!metaOk) issues.push(DEFAULT_ISSUES[2]);
-  if (!faqOk) issues.push("Aucune FAQ structurée détectée");
+  if (criteria.schema < 15) issues.push(DEFAULT_ISSUES[0]);
+  if (criteria.nap < 15) issues.push(DEFAULT_ISSUES[1]);
+  if (criteria.meta < 15) issues.push(DEFAULT_ISSUES[2]);
+  if (criteria.faq < 15) issues.push("Aucune FAQ structurée détectée");
 
   return {
-    score,
-    issues,
-    timeout: false
+    score: normalizedScore,
+    issues: issues.length ? issues : DEFAULT_ISSUES,
+    timeout: false,
+    criteresDetail: formatCriteriaDetail(criteria)
   };
+}
+
+function formatCriteriaDetail(map: CriteriaScoreMap) {
+  return {
+    schemaOrg: Math.round(map.schema),
+    nap: Math.round(map.nap),
+    metadata: Math.round(map.meta),
+    faq: Math.round(map.faq),
+    vitesse: Math.round(map.speed),
+    citations: Math.round(map.citations)
+  };
+}
+
+function scoreSchema($: cheerio.CheerioAPI) {
+  return hasValidSchema($) ? 20 : 6;
 }
 
 function hasValidSchema($: cheerio.CheerioAPI) {
@@ -166,25 +211,33 @@ function hasValidSchema($: cheerio.CheerioAPI) {
   });
 }
 
-function hasNAP($: cheerio.CheerioAPI) {
+function scoreNAP($: cheerio.CheerioAPI) {
   const text = $("body").text();
   const hasPhone = /\+?\d[\d\s().-]{6,}/.test(text);
   const hasAddress = /(rue|avenue|boulevard|road|street|route|chemin|place|impasse|paris|france|bp\s*\d+)/i.test(text);
-  return hasPhone && hasAddress;
+  if (hasPhone && hasAddress) return 20;
+  if (hasPhone || hasAddress) return 12;
+  return 6;
 }
 
-function hasMetadata($: cheerio.CheerioAPI) {
+function scoreMetadata($: cheerio.CheerioAPI) {
   const title = $("title").text().trim();
   const metaDesc = $('meta[name="description"]').attr("content")?.trim();
   const ogTitle = $('meta[property="og:title"]').attr("content")?.trim();
   const ogDesc = $('meta[property="og:description"]').attr("content")?.trim();
   const ogImage = $('meta[property="og:image"]').attr("content")?.trim();
-  return [title, metaDesc, ogTitle, ogDesc, ogImage].every(Boolean);
+  const filled = [title, metaDesc, ogTitle, ogDesc, ogImage].filter(Boolean).length;
+  if (filled === 5) return 20;
+  if (filled >= 4) return 16;
+  if (filled >= 3) return 12;
+  if (filled >= 2) return 8;
+  if (filled >= 1) return 6;
+  return 4;
 }
 
-function hasFAQ($: cheerio.CheerioAPI) {
+function scoreFAQ($: cheerio.CheerioAPI) {
   const scripts = $('script[type="application/ld+json"]').toArray();
-  return scripts.some((script) => {
+  const hasFaq = scripts.some((script) => {
     try {
       const json = JSON.parse($(script).text());
       const entries = Array.isArray(json) ? json : [json];
@@ -193,16 +246,46 @@ function hasFAQ($: cheerio.CheerioAPI) {
       return false;
     }
   });
+  return hasFaq ? 20 : 8;
+}
+
+function scoreSpeed(htmlLength: number) {
+  if (htmlLength < 200_000) return 18;
+  if (htmlLength < 450_000) return 14;
+  return 10;
+}
+
+function scoreCitations($: cheerio.CheerioAPI, host?: string) {
+  const links = $('a[href^="http"]').toArray();
+  let externalCount = 0;
+  links.forEach((link) => {
+    const href = $(link).attr("href");
+    if (!href) return;
+    try {
+      const linkUrl = new URL(href);
+      if (!host || linkUrl.hostname !== host) {
+        externalCount += 1;
+      }
+    } catch (error) {
+      externalCount += 1;
+    }
+  });
+  if (externalCount >= 20) return 18;
+  if (externalCount >= 10) return 14;
+  if (externalCount >= 4) return 10;
+  return 6;
 }
 
 function getFallbackEvaluation() {
-  return { score: FALLBACK_SCORE, issues: DEFAULT_ISSUES, timeout: true };
+  return { score: FALLBACK_SCORE, issues: DEFAULT_ISSUES, timeout: true, criteresDetail: DEFAULT_CRITERES_DETAIL };
 }
 
 function getFallbackResponse() {
   const pricing = getPricing(FALLBACK_SCORE);
+  const valeurPerdue = Math.max(0, Math.round((100 - FALLBACK_SCORE) * 120));
   return {
     auditId: null,
+    url: undefined,
     score: FALLBACK_SCORE,
     level: pricing.label,
     niveau: pricing.niveau,
@@ -213,6 +296,8 @@ function getFallbackResponse() {
     explanation: FALLBACK_EXPLANATION,
     explication: FALLBACK_EXPLANATION,
     lacunes: DEFAULT_ISSUES,
+    criteresDetail: DEFAULT_CRITERES_DETAIL,
+    valeurPerdue,
     timeout: true
   };
 }
