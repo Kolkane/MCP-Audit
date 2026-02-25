@@ -1,20 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, AlertCircle, Mail } from "lucide-react";
 import { MAINTENANCE_PRICE } from "@/lib/pricing";
 import clsx from "clsx";
-
-interface AnalyzeResponse {
-  auditId: string;
-  score: number;
-  issues: string[];
-  priceActivation: number;
-  maintenancePrice?: number;
-  level?: string;
-  explanation?: string;
-  timeout?: boolean;
-}
+import { useHeroAnalyzer } from "@/components/hero-analyzer-context";
 
 const severityMap = {
   low: {
@@ -47,40 +37,22 @@ function getStrokeDashoffset(score: number) {
 }
 
 export function HeroAnalyzer() {
-  const [url, setUrl] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<AnalyzeResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { url, setUrl, analysisState, result, error, analyze, setError } = useHeroAnalyzer();
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState("");
   const [emailStatus, setEmailStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [checkoutLoading, setCheckoutLoading] = useState<"activation" | "maintenance" | null>(null);
 
+  useEffect(() => {
+    if (analysisState === "loading") {
+      setShowEmailForm(false);
+      setEmailStatus("idle");
+    }
+  }, [analysisState]);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!url) return;
-    setLoading(true);
-    setError(null);
-    setResult(null);
-    setShowEmailForm(false);
-
-    try {
-      const response = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url })
-      });
-      if (!response.ok) {
-        throw new Error("Analyse impossible");
-      }
-      const data = (await response.json()) as AnalyzeResponse;
-      setResult(data);
-    } catch (err) {
-      console.error(err);
-      setError("Impossible d'analyser cette URL pour l'instant. Réessaie dans un instant.");
-    } finally {
-      setLoading(false);
-    }
+    await analyze();
   };
 
   const handleSendReport = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -101,8 +73,8 @@ export function HeroAnalyzer() {
       });
       if (!response.ok) throw new Error();
       setEmailStatus("success");
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       setEmailStatus("error");
     }
   };
@@ -134,6 +106,7 @@ export function HeroAnalyzer() {
   const severity = getSeverity(result?.score ?? 0);
   const activationPrice = result?.priceActivation ?? 249;
   const maintenancePrice = result?.maintenancePrice ?? MAINTENANCE_PRICE;
+  const loading = analysisState === "loading";
 
   return (
     <div className="mt-8 w-full max-w-2xl">
@@ -167,7 +140,7 @@ export function HeroAnalyzer() {
             <Loader2 className="h-5 w-5 animate-spin text-accent" /> Analyse en cours...
           </div>
         )}
-        {!loading && result && (
+        {!loading && result && analysisState === "done" && (
           <div className="space-y-4">
             <div className="w-full rounded-2xl bg-white p-6 shadow-[0_20px_60px_rgba(99,102,241,0.12)]">
               <div className="grid gap-6 md:grid-cols-2">
@@ -226,7 +199,7 @@ export function HeroAnalyzer() {
                 <button
                   type="button"
                   onClick={() => handleCheckout(false)}
-                  className="w-full rounded-2xl bg-accent px-5 py-3 text-sm font-semibold text-white"
+                  className="w-full rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500"
                   disabled={checkoutLoading === "activation"}
                 >
                   {checkoutLoading === "activation" ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : `Payer ${activationPrice}€ HT →`}
@@ -234,18 +207,20 @@ export function HeroAnalyzer() {
                 <button
                   type="button"
                   onClick={() => handleCheckout(true)}
-                  className="w-full rounded-2xl border border-accent px-5 py-3 text-sm font-semibold text-accent"
+                  className="w-full rounded-2xl border border-indigo-200 bg-indigo-50 px-5 py-3 text-sm font-semibold text-indigo-600"
                   disabled={checkoutLoading === "maintenance"}
                 >
-                  {checkoutLoading === "maintenance"
-                    ? <Loader2 className="mx-auto h-5 w-5 animate-spin" />
-                    : `Inclure la maintenance (${maintenancePrice}€ HT/mois) →`}
+                  {checkoutLoading === "maintenance" ? (
+                    <Loader2 className="mx-auto h-5 w-5 animate-spin" />
+                  ) : (
+                    "Inclure la maintenance →"
+                  )}
                 </button>
                 <button
                   onClick={() => setShowEmailForm((prev) => !prev)}
-                  className="w-full rounded-2xl border border-accent/40 px-5 py-3 text-sm font-semibold text-accent transition hover:bg-indigo-50"
+                  className="w-full rounded-2xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-600"
                 >
-                  Recevoir le rapport complet gratuit par email →
+                  Recevoir le rapport par email →
                 </button>
                 {showEmailForm && (
                   <form onSubmit={handleSendReport} className="space-y-3 rounded-2xl border border-[#E2E8F0] bg-[#F8F9FF] p-4 text-sm">

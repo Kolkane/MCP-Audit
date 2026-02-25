@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   AlertCircle,
@@ -24,10 +26,10 @@ import {
 } from "lucide-react";
 import { FadeIn } from "@/components/fade-in";
 import { ScoreAnimation } from "@/components/score-animation";
-import { AuditForm } from "@/components/audit-form";
 import { Navbar } from "@/components/navbar";
 import { HeroAnalyzer } from "@/components/hero-analyzer";
 import { PricingPlans } from "@/components/pricing-plans";
+import { HeroAnalyzerProvider, useHeroAnalyzer } from "@/components/hero-analyzer-context";
 
 const problemPoints = [
   {
@@ -83,7 +85,6 @@ const personas = [
   { label: "E-commerce", benefit: "Vos produits lus par les agents IA", icon: ShoppingBag }
 ];
 
-
 const testimonials = [
   {
     label: "Freelance UX · Paris",
@@ -133,6 +134,16 @@ const calendlyUrl = process.env.NEXT_PUBLIC_CALENDLY_URL || "https://calendly.co
 
 export default function Page() {
   return (
+    <HeroAnalyzerProvider>
+      <MainPage />
+    </HeroAnalyzerProvider>
+  );
+}
+
+function MainPage() {
+  const { analysisState } = useHeroAnalyzer();
+
+  return (
     <main className="bg-background text-night">
       <Navbar />
       {/* HERO */}
@@ -157,9 +168,11 @@ export default function Page() {
             </div>
           </FadeIn>
           <FadeIn>
-            <div className="w-full lg:w-auto">
-              <ScoreAnimation />
-            </div>
+            {analysisState === "idle" && (
+              <div className="w-full lg:w-auto">
+                <ScoreAnimation />
+              </div>
+            )}
           </FadeIn>
         </div>
       </section>
@@ -186,8 +199,6 @@ export default function Page() {
           </FadeIn>
         </div>
       </section>
-
-      {/* PROCESS */}
 
       {/* REPORT */}
       <section className="section" id="report">
@@ -259,7 +270,7 @@ export default function Page() {
                                 strokeWidth="8"
                                 fill="none"
                                 strokeDasharray={2 * Math.PI * 52}
-                                strokeDashoffset={2 * Math.PI * 52 - (34/100) * 2 * Math.PI * 52}
+                                strokeDashoffset={2 * Math.PI * 52 - (34 / 100) * 2 * Math.PI * 52}
                                 strokeLinecap="round"
                                 transform="rotate(-90 60 60)"
                               />
@@ -335,7 +346,7 @@ export default function Page() {
         </div>
       </section>
 
-      {/* PERSONAS */}
+      {/* PROCESS */}
       <section className="section" id="process">
         <div className="mx-auto max-w-6xl px-6">
           <FadeIn>
@@ -398,149 +409,5 @@ export default function Page() {
                     <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#EEF2FF] text-accent">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <h3 className="mt-4 text-lg font-semibold text-night">{persona.label}</h3>
-                    <p className="mt-2 text-sm text-slate">{persona.benefit}</p>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="mt-8 flex items-center justify-center gap-3">
-              <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-white">Si vous avez un site</span>
-              <p className="text-base font-semibold text-night">Vous avez besoin d'un score Agentable.</p>
-            </div>
-          </FadeIn>
-        </div>
-      </section>
 
-
-      {/* PRICING */}
-      <section className="section" id="pricing">
-        <div className="mx-auto max-w-6xl px-6">
-          <FadeIn>
-            <div className="text-center">
-              <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent">Tarifs</span>
-              <h2 className="mt-3 text-3xl font-bold text-night">Simple. Transparent. Personnalisé.</h2>
-              <p className="mx-auto mt-2 max-w-lg text-base text-slate">
-                Votre prix d'activation est calculé automatiquement selon votre score. Entrez votre URL pour le connaître.
-              </p>
-            </div>
-            <PricingPlans calendlyUrl={calendlyUrl} />
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* TESTIMONIALS */}
-      <section className="section bg-surface" id="social-proof">
-        <div className="mx-auto max-w-6xl px-6">
-          <FadeIn>
-            <div className="grid gap-6 md:grid-cols-3">
-              {testimonials.map((item, index) => (
-                <div
-                  key={item.label}
-                  className={`rounded-2xl border border-border bg-white p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] md:${index === 0 ? "-rotate-1" : index === 2 ? "rotate-1" : "rotate-0"}`}
-                >
-                  <div className="text-6xl font-serif leading-none text-indigo-100">“</div>
-                  <p className="mt-2 text-base font-medium italic text-night">{item.quote}</p>
-                  <div className="my-4 h-px w-full border-t border-[#F1F5F9]" />
-                  <div className="flex items-center justify-between">
-                    <span className="rounded-full border border-green-200 bg-green-50 px-3 py-1 text-sm font-bold text-green-700">
-                      {item.delta} ↑
-                    </span>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-night">{item.label.split(" — ")[0]}</p>
-                      <p className="text-xs text-slate">{item.label.split(" — ")[1]}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* REPORT EMAIL */}
-      <section className="section" id="report-email">
-        <div className="mx-auto max-w-4xl rounded-3xl border border-[#E2E8F0] bg-white p-10 text-center shadow-[0_20px_60px_rgba(99,102,241,0.12)]">
-          <FadeIn>
-            <h2 className="text-3xl font-semibold text-night">Vous préférez un rapport complet ?</h2>
-            <p className="mt-3 text-base text-slate">Laissez votre email — nous vous envoyons l'analyse complète sous 24h.</p>
-            <div className="mt-8 flex flex-col gap-4 md:flex-row">
-              <input
-                type="email"
-                placeholder="votre@email.fr"
-                className="flex-1 rounded-xl border border-border px-4 py-3 text-night focus:border-accent focus:outline-none"
-              />
-              <button className="rounded-xl bg-accent px-6 py-3 text-base font-semibold text-white">Recevoir le rapport complet →</button>
-            </div>
-            <p className="mt-3 text-sm text-slate">✓ Gratuit · ✓ 24h · ✓ RGPD</p>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="section" id="faq">
-        <div className="mx-auto max-w-3xl px-6">
-          <FadeIn>
-            {faq.map((item) => (
-              <details key={item.question} className="group border-b border-[#F1F5F9] py-5">
-                <summary className="flex cursor-pointer items-center justify-between text-base font-semibold text-night transition hover:text-accent">
-                  {item.question}
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#EEF2FF] text-sm font-bold text-indigo-500 transition group-open:rotate-45">
-                    +
-                  </span>
-                </summary>
-                <p className="pb-4 pt-3 text-sm leading-relaxed text-slate">{item.answer}</p>
-              </details>
-            ))}
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* CTA FINAL */}
-      <section className="section">
-        <div className="mx-auto max-w-4xl rounded-3xl bg-gradient-to-br from-[#4F46E5] to-accent p-12 text-center text-white">
-          <FadeIn>
-            <h2 className="text-4xl font-semibold">Si vous avez un site, vous méritez d'être visible partout — y compris sur les IA.</h2>
-            <div className="mt-8 flex flex-wrap justify-center gap-4">
-              <a
-                href="#hero"
-                className="rounded-xl bg-white px-6 py-4 text-base font-semibold text-[#4F46E5] shadow-[0_4px_16px_rgba(0,0,0,0.15)] transition hover:bg-indigo-50"
-              >
-                Je veux mon score maintenant
-              </a>
-              <a
-                href="#pricing"
-                className="rounded-xl border-2 border-white/60 px-6 py-4 text-base font-semibold text-white transition hover:border-white hover:bg-white/10"
-              >
-                Voir les offres
-              </a>
-            </div>
-            <p className="mt-4 text-sm text-white/70">✓ Sans engagement · ✓ Résultats en 48h · ✓ 100% automatique</p>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="bg-night py-10 text-sm text-[#94A3B8]">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-base font-semibold text-white">Agentable</p>
-            <p>Jungle.Block Solutions · SIRET 99521609000010 · Service 100% français 🇫🇷</p>
-            <p>© 2025 Agentable — Tous droits réservés</p>
-          </div>
-          <div className="flex flex-wrap gap-6 text-sm">
-            <Link href="/mentions-legales" className="text-white/80">
-              Mentions légales
-            </Link>
-            <a href="mailto:contact@agentable.fr" className="text-white/80">
-              Contact
-            </a>
-            <Link href={calendlyUrl} className="text-white/80" target="_blank">
-              Besoin d'aide ? Parlons-en
-            </Link>
-          </div>
-        </div>
-      </footer>
-    </main>
-  );
-}
+[truncated]

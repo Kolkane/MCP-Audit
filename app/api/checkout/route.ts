@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { getSupabaseServerClient } from "@/lib/supabase";
-import { getActivationPrice } from "@/lib/pricing";
+import { getPricing, MAINTENANCE_ENV_KEY } from "@/lib/pricing";
 
 export async function POST(request: Request) {
   try {
@@ -30,13 +30,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Audit expiré" }, { status: 410 });
     }
 
-    const priceInfo = getActivationPrice(audit.score);
-    if (!priceInfo.stripePrice) {
+    const pricing = getPricing(audit.score ?? 0);
+    const activationPriceId = process.env[pricing.stripeEnvKey];
+    if (!activationPriceId) {
       throw new Error("Prix Stripe non configuré pour ce score");
     }
 
-    const maintenancePriceId = process.env.STRIPE_PRICE_MAINTENANCE;
-    const lineItems: { price: string; quantity: number }[] = [{ price: priceInfo.stripePrice, quantity: 1 }];
+    const maintenancePriceId = process.env[MAINTENANCE_ENV_KEY];
+    const lineItems: { price: string; quantity: number }[] = [{ price: activationPriceId, quantity: 1 }];
 
     if (addMaintenance) {
       if (!maintenancePriceId) {
@@ -54,7 +55,8 @@ export async function POST(request: Request) {
         auditId: audit.id,
         url: audit.url,
         score: String(audit.score),
-        niveau: audit.niveau
+        niveau: audit.niveau,
+        addMaintenance: addMaintenance ? "true" : "false"
       }
     });
 
