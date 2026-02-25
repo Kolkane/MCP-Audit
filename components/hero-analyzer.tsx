@@ -50,7 +50,7 @@ const levelBadges = {
 
 type CheckoutState = "activation" | "maintenance" | null;
 
-export function HeroAnalyzer() {
+export function HeroAnalyzer({ simpleOnly = false }: { simpleOnly?: boolean } = {}) {
   const { url, setUrl, analysisState, result, error, analyze, setError, reset } = useHeroAnalyzer();
   const [progress, setProgress] = useState(0);
   const [checkoutLoading, setCheckoutLoading] = useState<CheckoutState>(null);
@@ -114,27 +114,35 @@ export function HeroAnalyzer() {
 
   return (
     <div>
-      <form onSubmit={handleSubmit} className="mx-auto mt-8 flex w-full max-w-xl flex-col gap-3 sm:flex-row">
+      <form onSubmit={handleSubmit} className={clsx("flex w-full flex-col gap-3", simpleOnly ? "max-w-lg mx-auto mt-0" : "mx-auto mt-8 max-w-xl sm:flex-row")}> 
         <input
           type="url"
           required
           value={url}
           onChange={(event) => setUrl(event.target.value)}
           placeholder="https://votre-site.fr"
-          className="flex-1 rounded-2xl border-2 border-[#E2E8F0] bg-white px-5 py-4 text-base text-night focus:border-indigo-400 focus:outline-none"
+          className={clsx(
+            "rounded-[14px] border-2 border-[#E2E8F0] bg-white px-5 py-4 text-base text-night placeholder:text-[#94A3B8] focus:border-indigo-400 focus:outline-none",
+            simpleOnly ? "w-full shadow-sm" : "flex-1"
+          )}
         />
         <button
           type="submit"
-          className="rounded-2xl bg-indigo-600 px-8 py-4 text-base font-semibold text-white transition hover:bg-indigo-700"
+          className={clsx(
+            "rounded-[14px] bg-indigo-600 py-4 text-base font-bold text-white transition hover:bg-indigo-700 shadow-[0_4px_16px_rgba(99,102,241,0.35)]",
+            simpleOnly ? "w-full" : "px-8"
+          )}
         >
           {analysisState === "loading" ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "Analyser gratuitement →"}
         </button>
       </form>
-      <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-xs text-[#94A3B8]">
-        {HERO_BADGES.map((badge) => (
-          <span key={badge.label} className="rounded-full bg-white/60 px-3 py-1 font-semibold">{badge.label}</span>
-        ))}
-      </div>
+      {!simpleOnly && (
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-xs text-[#94A3B8]">
+          {HERO_BADGES.map((badge) => (
+            <span key={badge.label} className="rounded-full bg-white/60 px-3 py-1 font-semibold">{badge.label}</span>
+          ))}
+        </div>
+      )}
       {analysisState === "done" && (
         <button
           type="button"

@@ -179,42 +179,35 @@ function HeroSection() {
         backgroundColor: "#F8FAFF"
       }}
     >
-      <div className="mx-auto max-w-2xl px-6 py-36 text-center">
+      <div className="mx-auto max-w-2xl px-6 py-36 text-center sm:py-36">
         <FadeIn>
-          <span className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white px-5 py-2 text-xs font-semibold uppercase tracking-[0.5em] text-indigo-600 shadow-sm">
-            <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
-            ✦ NOUVEAU — VISIBILITÉ IA POUR TOUS LES SITES
+          <span className="mx-auto inline-flex items-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-4 py-2 text-xs font-medium text-[#64748B]">
+            🇫🇷 Service 100% français · Lancé en 2025
           </span>
-          <h1 className="mt-6 text-4xl font-black leading-tight text-[#0F172A] sm:text-6xl sm:leading-[1.08]">
-            Votre site existe sur Google.
-            <br />
-            Mais existe-t-il pour
-            <br />
-            <span className="text-indigo-600">ChatGPT, Perplexity</span>
-            <br />
-            et les agents IA ?
+          <h1 className="mt-6 text-4xl font-black leading-tight text-[#0F172A] sm:text-5xl sm:leading-[1.08]">
+            Votre site existe sur Google. Mais existe-t-il pour <span className="text-indigo-600">ChatGPT, Perplexity</span> et les agents IA ?
           </h1>
           <p className="mx-auto mt-5 max-w-lg text-xl leading-relaxed text-[#64748B]">
             Entrez votre URL — notre agent analyse votre visibilité IA en 60 secondes, gratuitement.
           </p>
-          <div className="mx-auto mt-10 max-w-xl">
-            <div className="flex flex-col gap-2 rounded-3xl border-2 border-[#E2E8F0] bg-white p-2 shadow-[0_8px_32px_rgba(0,0,0,0.08)] transition focus-within:border-indigo-400 sm:flex-row sm:items-center">
-              <HeroAnalyzer />
+          <div className="mx-auto mt-10 max-w-lg">
+            <div className="flex flex-col gap-3">
+              <HeroAnalyzer simpleOnly />
             </div>
           </div>
-          <div className="mt-5 flex flex-col gap-3 text-sm text-[#64748B] sm:flex-row sm:items-center sm:justify-center sm:gap-8">
-            <div className="flex items-center justify-center gap-2">
+          <div className="mt-5 flex flex-col gap-2 text-sm text-[#64748B] sm:flex-row sm:items-center sm:justify-center sm:gap-6">
+            <div className="flex items-center justify-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-green-500" />
               Score moyen PME FR : 23/100
             </div>
-            <div className="hidden h-4 w-px bg-[#E2E8F0] sm:block" />
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-amber-500 text-base">⚡</span>
+            <div className="hidden h-3 w-px bg-[#E2E8F0] sm:block" />
+            <div className="flex items-center justify-center gap-1.5">
+              <span className="text-amber-500">⚡</span>
               Résultat en 60 secondes
             </div>
-            <div className="hidden h-4 w-px bg-[#E2E8F0] sm:block" />
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-indigo-500 text-base">🔒</span>
+            <div className="hidden h-3 w-px bg-[#E2E8F0] sm:block" />
+            <div className="flex items-center justify-center gap-1.5">
+              <span>🔒</span>
               100% gratuit
             </div>
           </div>
