@@ -179,15 +179,13 @@ function HeroSection() {
         backgroundColor: "#F8FAFF"
       }}
     >
-      <div className="mx-auto max-w-3xl px-6 py-36 text-center sm:py-36">
+      <div className="mx-auto max-w-4xl px-6 py-36 text-center sm:py-36">
         <FadeIn>
           <span className="mx-auto inline-flex items-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-4 py-2 text-xs font-medium text-[#64748B]">
             🇫🇷 Service 100% français · Lancé en 2025
           </span>
-          <h1 className="mt-6 text-4xl font-black leading-tight text-[#0F172A] sm:text-5xl sm:leading-[1.08]">
-            <span className="block">Votre site existe sur Google.</span>
-            <span className="mt-2 block">Mais existe-t-il pour <span className="text-indigo-600">ChatGPT, Perplexity</span></span>
-            <span className="block">et les agents IA ?</span>
+          <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-black leading-tight text-[#0F172A] sm:text-6xl sm:leading-[1.05]">
+            Votre site existe sur Google. Mais existe-t-il pour <span className="text-indigo-600">ChatGPT, Perplexity</span> et les agents IA ?
           </h1>
           <p className="mx-auto mt-5 max-w-lg text-xl leading-relaxed text-[#64748B]">
             Entrez votre URL — notre agent analyse votre visibilité IA en 60 secondes, gratuitement.
