@@ -162,7 +162,6 @@ function MainPage() {
         )}
       </AnimatePresence>
       <TestimonialsSection />
-      <ReportEmailSection />
       <FaqSection />
       <FinalCtaSection />
       <SiteFooter />
@@ -496,28 +495,6 @@ function TestimonialsSection() {
               </div>
             ))}
           </div>
-        </FadeIn>
-      </div>
-    </section>
-  );
-}
-
-function ReportEmailSection() {
-  return (
-    <section className="section" id="report-email">
-      <div className="mx-auto max-w-4xl rounded-3xl border border-[#E2E8F0] bg-white p-10 text-center shadow-[0_20px_60px_rgba(99,102,241,0.12)]">
-        <FadeIn>
-          <h2 className="text-3xl font-semibold text-night">Vous préférez un rapport complet ?</h2>
-          <p className="mt-3 text-base text-slate">Laissez votre email — nous vous envoyons l'analyse complète sous 24h.</p>
-          <div className="mt-8 flex flex-col gap-4 md:flex-row">
-            <input
-              type="email"
-              placeholder="prenom@entreprise.com"
-              className="flex-1 rounded-xl border border-border px-4 py-3 text-night focus:border-accent focus:outline-none"
-            />
-            <button className="rounded-xl bg-accent px-6 py-3 text-base font-semibold text-white">Recevoir le rapport complet →</button>
-          </div>
-          <p className="mt-3 text-sm text-slate">✓ Gratuit · ✓ 24h · ✓ RGPD</p>
         </FadeIn>
       </div>
     </section>
