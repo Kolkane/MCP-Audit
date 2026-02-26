@@ -110,8 +110,8 @@ const faq = [
     answer: "Oui, entièrement. Vous obtenez votre score Agent-Readiness /100 avec le détail des 6 critères analysés. Aucun moyen de paiement demandé."
   },
   {
-    question: "Qu'est-ce que le MCP et pourquoi c'est important ?",
-    answer: "Le MCP (Model Context Protocol) est le standard qui permet aux agents IA comme ChatGPT ou Perplexity d'interroger directement votre site pour en comprendre le contenu. Sans endpoint MCP, votre site est une boîte noire pour les IA — elles ne peuvent pas vous recommander."
+    question: "C'est quoi le GEO exactement ?",
+    answer: "Le GEO (Generative Engine Optimization) est l'équivalent du SEO pour les IA génératives. Là où le SEO vous positionne sur Google, le GEO vous rend visible et citable dans les réponses de ChatGPT, Perplexity et Gemini. En 2025, ces moteurs représentent une part croissante des recherches — et la majorité des sites français ne sont pas optimisés pour eux."
   },
   {
     question: "Que contient la mise en conformité ?",
@@ -189,6 +189,9 @@ function HeroSection() {
           </h1>
           <p className="mx-auto mt-5 max-w-lg text-xl leading-relaxed text-[#64748B]">
             Entrez votre URL — notre agent analyse votre visibilité IA en 60 secondes, gratuitement.
+          </p>
+          <p className="mx-auto mt-2 max-w-lg text-center text-xs text-[#94A3B8]">
+            Le GEO (Generative Engine Optimization) est le référencement de la nouvelle génération — optimiser son site non plus pour Google, mais pour les intelligences artificielles.
           </p>
           <div className="mx-auto mt-10 max-w-lg">
             <div className="flex flex-col gap-3">
@@ -408,6 +411,9 @@ function ProcessSection() {
       <div className="mx-auto max-w-6xl px-6">
         <FadeIn>
           <h2 className="text-center text-3xl font-bold text-night">Comment ça marche</h2>
+          <p className="mx-auto mb-8 mt-4 max-w-xl text-center text-base text-[#64748B]">
+            Le GEO, c'est simple : adapter votre site pour que ChatGPT, Perplexity et Gemini vous comprennent, vous lisent et vous recommandent.
+          </p>
           <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             {steps.map((step, index) => {
               const Icon = step.icon;
