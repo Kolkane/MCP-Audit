@@ -167,7 +167,7 @@ export function ResultReport({ result, checkoutLoading, onCheckout }: ResultRepo
   };
 
   return (
-    <div className="mx-auto mt-10 flex w-full max-w-5xl flex-col gap-6">
+    <div className="mx-auto mt-10 flex w-full max-w-5xl flex-col gap-6 px-4 sm:px-0">
       {/* Bloc 1 */}
       <motion.section {...motionBase(0)} className="rounded-3xl border border-white/5 bg-[#0F172A] p-10 text-white">
         <div className="grid gap-10 lg:grid-cols-[1.6fr_1fr_1fr]">
@@ -204,8 +204,8 @@ export function ResultReport({ result, checkoutLoading, onCheckout }: ResultRepo
             <MetricCard label="Priorité" value={priority} valueClassName={priorityColor} />
           </div>
 
-          <div className="flex flex-col items-center justify-center">
-            <svg width="180" height="180" viewBox="0 0 160 160">
+          <div className="hidden max-w-[140px] overflow-hidden md:flex flex-col items-center justify-center">
+            <svg width="140" height="140" viewBox="0 0 140 140">
               <defs>
                 <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
                   {result.score > 60 ? (
@@ -226,25 +226,25 @@ export function ResultReport({ result, checkoutLoading, onCheckout }: ResultRepo
                   )}
                 </linearGradient>
               </defs>
-              <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="14" />
+              <circle cx="70" cy="70" r="55" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="12" />
               <motion.circle
-                cx="80"
-                cy="80"
-                r="70"
+                cx="70"
+                cy="70"
+                r="55"
                 fill="none"
                 stroke={`url(#${gradientId})`}
                 strokeWidth="14"
                 strokeLinecap="round"
-                strokeDasharray={439.8}
-                strokeDashoffset={439.8}
-                transform="rotate(-90 80 80)"
-                animate={{ strokeDashoffset: 439.8 - 439.8 * scoreRatio }}
+                strokeDasharray={345.6}
+                strokeDashoffset={345.6}
+                transform="rotate(-90 70 70)"
+                animate={{ strokeDashoffset: 345.6 - 345.6 * scoreRatio }}
                 transition={{ duration: 1.5, ease: "easeOut" }}
               />
-              <text x="80" y="76" textAnchor="middle" className="text-3xl font-black" fill="white">
+              <text x="70" y="66" textAnchor="middle" className="text-3xl font-black" fill="white">
                 {result.score}
               </text>
-              <text x="80" y="94" textAnchor="middle" fill="rgba(255,255,255,0.35)" className="text-xs">
+              <text x="70" y="84" textAnchor="middle" fill="rgba(255,255,255,0.35)" className="text-xs">
                 GEO Score
               </text>
             </svg>
@@ -278,27 +278,27 @@ export function ResultReport({ result, checkoutLoading, onCheckout }: ResultRepo
                 {result.score}/100
               </span>
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {criteres.map((criterion, index) => (
                 <div
                   key={criterion.key}
-                  className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition hover:border-slate-200"
+                  className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition hover:border-slate-200 min-h-[220px]"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className={clsx("flex h-7 w-7 items-center justify-center rounded-lg", criterion.iconTone)}>
-                        <criterion.meta.icon className="h-4 w-4" />
-                      </div>
-                      <p className="text-sm font-semibold text-slate-900">{criterion.meta.label}</p>
+                  <div className="flex items-center gap-3">
+                    <div className={clsx("flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg", criterion.iconTone)}>
+                      <criterion.meta.icon className="h-4 w-4" />
                     </div>
-                    <span
-                      className={clsx(
-                        "text-sm font-semibold",
-                        criterion.score < 9 ? "text-red-500" : criterion.score < 14 ? "text-orange-500" : "text-green-600"
-                      )}
-                    >
-                      {criterion.score}/20
-                    </span>
+                    <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-900">
+                      <p>{criterion.meta.label}</p>
+                      <span
+                        className={clsx(
+                          "text-sm font-semibold",
+                          criterion.score < 9 ? "text-red-500" : criterion.score < 14 ? "text-orange-500" : "text-green-600"
+                        )}
+                      >
+                        {criterion.score}/20
+                      </span>
+                    </div>
                   </div>
                   <div className="mt-3 h-2 rounded-full bg-slate-200">
                     <motion.div
@@ -340,9 +340,9 @@ export function ResultReport({ result, checkoutLoading, onCheckout }: ResultRepo
             </div>
           </div>
           <div className="flex flex-col gap-4">
-            <div className="flex flex-1 flex-col rounded-2xl border border-red-950/50 bg-[#1A0505] p-6">
+            <div className="flex flex-1 flex-col rounded-2xl border border-red-950/40 bg-red-950 p-6">
               <p className="text-xs font-bold uppercase tracking-[0.3em] text-red-400/60">Perte mensuelle</p>
-              <p className="mt-4 text-5xl font-black text-red-400">
+              <p className="mt-4 text-4xl font-black text-red-300">
                 -{new Intl.NumberFormat("fr-FR").format(animatedMonthlyLoss)}€
               </p>
               <p className="text-sm text-red-400/50">/mois estimés</p>
@@ -558,7 +558,10 @@ function buildCriterionLines(
         lines.push({ text: "✗ Aucun type Schema.org détecté", type: "negative" });
       }
       if (schema.missing?.length) {
-        lines.push({ text: `✗ Manquant : ${schema.missing.join(", ")}`, type: "negative" });
+        const display = schema.missing.slice(0, 3);
+        const extra = schema.missing.length - display.length;
+        const suffix = extra > 0 ? ` + ${extra} autres` : "";
+        lines.push({ text: `✗ Manquant : ${display.join(", ")}${suffix}`, type: "negative" });
       }
       break;
     }
