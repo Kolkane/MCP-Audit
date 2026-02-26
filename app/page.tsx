@@ -114,6 +114,10 @@ const faq = [
     answer: "Le GEO (Generative Engine Optimization) est l'équivalent du SEO pour les IA génératives. Là où le SEO vous positionne sur Google, le GEO vous rend visible et citable dans les réponses de ChatGPT, Perplexity et Gemini. En 2025, ces moteurs représentent une part croissante des recherches — et la majorité des sites français ne sont pas optimisés pour eux."
   },
   {
+    question: "Qu'est-ce que le MCP et est-ce inclus ?",
+    answer: "Le MCP (Model Context Protocol) est le protocole développé par Anthropic qui permet aux agents IA de dialoguer directement avec votre site pour en extraire les informations en temps réel. C'est le standard technique de demain — là où schema.org structure vos données pour être lues, le MCP les rend interrogeables à la demande par les agents IA. Son implémentation est incluse dans toutes nos offres d'activation."
+  },
+  {
     question: "Que contient la mise en conformité ?",
     answer: "Nous générons pour vous : le code schema.org complet, un fichier llms.txt optimisé, vos métadonnées corrigées et un rapport PDF détaillé. Vous recevez tout par email avec les instructions d'implémentation pas à pas. Optimisation livrée sous 48h."
   },
