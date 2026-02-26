@@ -115,11 +115,11 @@ const faq = [
   },
   {
     question: "Que contient la mise en conformité ?",
-    answer: "Nous générons pour vous : un endpoint MCP actif, le code schema.org complet, un fichier llms.txt optimisé et vos métadonnées corrigées. Vous recevez tout par email avec les instructions d'implémentation pas à pas. Score garanti >80/100 sous 48h."
+    answer: "Nous générons pour vous : le code schema.org complet, un fichier llms.txt optimisé, vos métadonnées corrigées et un rapport PDF détaillé. Vous recevez tout par email avec les instructions d'implémentation pas à pas. Optimisation livrée sous 48h."
   },
   {
     question: "Comment fonctionne la maintenance ?",
-    answer: "Les algorithmes des IA évoluent chaque mois. Notre agent repasse automatiquement sur votre site le 1er de chaque mois, recalcule votre score et applique les mises à jour nécessaires. Vous recevez un rapport mensuel avec l'évolution de votre score."
+    answer: "Notre agent repasse sur votre site le 1er de chaque mois, recalcule votre score GEO et applique les corrections nécessaires si une baisse est détectée. Vous recevez un rapport mensuel avec vos KPIs : évolution du score, critères mis à jour, actions effectuées."
   },
   {
     question: "Sous quel délai mon score s'améliore-t-il ?",
@@ -551,7 +551,7 @@ function FinalCtaSection() {
     <section className="section">
       <div className="mx-auto max-w-4xl rounded-3xl bg-gradient-to-br from-[#4F46E5] to-accent p-12 text-center text-white">
         <FadeIn>
-          <h2 className="text-4xl font-semibold">Si vous avez un site, vous méritez d'être visible partout — y compris sur les IA.</h2>
+          <h2 className="text-4xl font-semibold">Votre site est peut-être invisible pour ChatGPT, Perplexity et Gemini. Découvrez votre score GEO en 60 secondes — gratuitement.</h2>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <a href="#hero" className="rounded-xl bg-white px-6 py-4 text-base font-semibold text-[#4F46E5] shadow-[0_4px_16px_rgba(0,0,0,0.15)] transition hover:bg-indigo-50">
               Je veux mon score maintenant

@@ -142,6 +142,12 @@ export function ResultReport({ result, checkoutLoading, onCheckout }: ResultRepo
   const maintenancePrice = result.maintenancePrice ?? MAINTENANCE_PRICE;
   const totalToday = addMaintenance ? result.priceActivation + maintenancePrice : result.priceActivation;
   const formattedTotalToday = useMemo(() => new Intl.NumberFormat("fr-FR").format(totalToday), [totalToday]);
+  const includedItems = [
+    "Schema.org généré",
+    "Fichier llms.txt créé",
+    "Métadonnées optimisées",
+    "Score GEO amélioré sous 48h"
+  ];
   const formattedActivation = useMemo(
     () => new Intl.NumberFormat("fr-FR").format(result.priceActivation),
     [result.priceActivation]
@@ -351,6 +357,17 @@ export function ResultReport({ result, checkoutLoading, onCheckout }: ResultRepo
               <p className="text-5xl font-black">{formattedActivation}€ HT</p>
             </div>
             <p className="max-w-xl text-sm text-white/70">{explanation}</p>
+            <div className="space-y-2 text-sm text-white/80">
+              <p className="font-semibold text-white">Ce qui est inclus :</p>
+              <ul className="space-y-1">
+                {includedItems.map((item) => (
+                  <li key={item} className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-white" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
             <label className="mt-4 flex items-center gap-3 text-sm font-semibold" htmlFor="maintenance-checkbox">
               <input
                 id="maintenance-checkbox"

@@ -4,10 +4,18 @@ import Link from "next/link";
 import { Check } from "lucide-react";
 import { MAINTENANCE_PRICE } from "@/lib/pricing";
 
+const complianceFeatures = [
+  "Audit GEO technique complet",
+  "Optimisation livrée sous 48h",
+  "Schema.org + llms.txt générés",
+  "Score de conformité IA amélioré"
+];
+
 const maintenanceFeatures = [
-  "Monitoring score mensuel automatisé",
-  "Mises à jour dès qu'un critère baisse",
-  "Rapport mensuel + alertes en temps réel"
+  "Suivi mensuel de votre score GEO",
+  "Mises à jour techniques automatiques si score en baisse",
+  "Rapport mensuel avec KPIs réels",
+  "Veille algorithmes IA"
 ];
 
 export function PricingPlans({ calendlyUrl }: { calendlyUrl: string }) {
@@ -23,15 +31,26 @@ export function PricingPlans({ calendlyUrl }: { calendlyUrl: string }) {
     <div className="mx-auto mt-10 max-w-3xl space-y-6">
       <div className="rounded-3xl border border-[#E2E8F0] bg-white p-8 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate">Mise en conformité</p>
-        <h3 className="mt-3 text-4xl font-black text-night">À partir de 249€ HT</h3>
+        <h3 className="mt-3 text-4xl font-black text-night">À partir de 349€ HT</h3>
         <p className="mt-2 text-sm text-[#64748B]">
           Votre prix exact est calculé automatiquement selon votre score. Entrez votre URL pour le connaître.
         </p>
         <div className="mt-4 space-y-1 text-sm font-semibold text-[#94A3B8]">
-          <p>● Site simple (&gt;60) → 249€ HT</p>
-          <p>● Site moyen (40-60) → 390€ HT</p>
-          <p>● Site complexe (&lt;40) → 590€ HT</p>
+          <p>● Site simple (score &gt;60) → 349€ HT</p>
+          <p>● Site moyen (score 40-60) → 490€ HT</p>
+          <p>● Site complexe (score &lt;40) → 690€ HT</p>
         </div>
+        <p className="mt-3 text-xs italic text-[#94A3B8]">
+          Les agences GEO facturent ce service entre 1 500€ et 3 000€ HT. Agentable le fait en automatique, livré sous 48h.
+        </p>
+        <ul className="mt-4 space-y-2 text-sm text-night">
+          {complianceFeatures.map((feature) => (
+            <li key={feature} className="flex items-center gap-2">
+              <Check className="h-4 w-4 text-indigo-500" />
+              {feature}
+            </li>
+          ))}
+        </ul>
         <button
           type="button"
           onClick={focusHeroInput}
@@ -47,10 +66,7 @@ export function PricingPlans({ calendlyUrl }: { calendlyUrl: string }) {
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/40">Maintenance mensuelle</p>
             <h3 className="mt-2 text-xl font-bold text-white">Pourquoi la maintenance est essentielle</h3>
             <p className="mt-3 text-sm text-white/60 leading-relaxed">
-              Les algorithmes des IA évoluent chaque mois. Un site optimisé aujourd'hui peut perdre 30 points de score en 3 mois sans suivi.
-            </p>
-            <p className="mt-2 text-sm text-white/60 leading-relaxed">
-              Sans maintenance, votre score baisse. Avec elle, il reste au-dessus de 80/100 toute l'année — automatiquement.
+              Les algorithmes des IA évoluent chaque mois. Un site optimisé aujourd'hui peut perdre en lisibilité en 3 mois sans suivi. Notre agent repasse sur votre site chaque mois, mesure l'évolution de votre score GEO et applique les mises à jour nécessaires.
             </p>
             <ul className="mt-4 space-y-2 text-sm text-white/80">
               {maintenanceFeatures.map((feature) => (
@@ -60,6 +76,7 @@ export function PricingPlans({ calendlyUrl }: { calendlyUrl: string }) {
                 </li>
               ))}
             </ul>
+            <p className="mt-3 text-sm text-white/70">Score GEO suivi et optimisé en continu.</p>
           </div>
           <div className="md:w-1/3">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-white">
