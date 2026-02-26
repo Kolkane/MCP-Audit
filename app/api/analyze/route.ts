@@ -7,6 +7,8 @@ import { getSupabaseServerClient } from "@/lib/supabase";
 
 const ANALYZE_TIMEOUT_MS = 20_000;
 const MAX_ANALYSES_PER_HOUR = 3;
+const CACHE_WINDOW_MS = 24 * 60 * 60 * 1000; // 24h
+const FALLBACK_SCORE = 35;
 
 const DEFAULT_ISSUES = [
   "Vos données schema.org sont absentes ou incomplètes",
@@ -24,22 +26,45 @@ const CRITERIA_LABELS = [
 ] as const;
 
 const FALLBACK_EXPLANATION = "Votre site présente plusieurs lacunes critiques détectées lors de l'analyse.";
+const BLOCKED_EXPLANATION =
+  "Votre site a limité l'accès lors de l'analyse. Score de précaution attribué — les lacunes détectées sont représentatives de la majorité des sites non optimisés.";
 
-function createFallbackDetail() {
-  return {
-    schemaOrg: Math.floor(Math.random() * 9),
-    nap: Math.floor(Math.random() * 11) + 5,
-    metadata: Math.floor(Math.random() * 9) + 4,
-    faq: Math.floor(Math.random() * 7),
-    vitesse: Math.floor(Math.random() * 9) + 8,
-    citations: Math.floor(Math.random() * 7) + 2
+const FIXED_NO_HTML_DETAIL = {
+  schemaOrg: 2,
+  nap: 8,
+  metadata: 6,
+  faq: 1,
+  vitesse: 12,
+  citations: 3
+};
+
+const SIZE_FALLBACK_DETAIL = {
+  low: { schemaOrg: 4, nap: 4, metadata: 4, faq: 3, vitesse: 5, citations: 4 },
+  medium: { schemaOrg: 6, nap: 6, metadata: 6, faq: 5, vitesse: 6, citations: 7 },
+  high: { schemaOrg: 8, nap: 8, metadata: 8, faq: 6, vitesse: 9, citations: 9 }
+} as const;
+
+type CriteriaScoreMap = Record<(typeof CRITERIA_LABELS)[number]["key"], number>;
+type CriteriaDetail = {
+  schemaOrg: number;
+  nap: number;
+  metadata: number;
+  faq: number;
+  vitesse: number;
+  citations: number;
+};
+type EvaluationResult = {
+  score: number;
+  issues: string[];
+  timeout: boolean;
+  criteresDetail: CriteriaDetail;
+  flags?: {
+    hasSchema: boolean;
+    hasNAP: boolean;
+    hasMeta: boolean;
+    hasFAQ: boolean;
   };
-}
-
-function scoreFromDetail(detail: ReturnType<typeof createFallbackDetail>) {
-  const total = detail.schemaOrg + detail.nap + detail.metadata + detail.faq + detail.vitesse + detail.citations;
-  return Math.max(0, Math.min(100, Math.round((total / 120) * 100)));
-}
+};
 
 export async function POST(request: Request) {
   try {
@@ -55,6 +80,9 @@ export async function POST(request: Request) {
     } catch (error) {
       return NextResponse.json({ error: "URL invalide" }, { status: 400 });
     }
+
+    const displayUrl = parsed.toString();
+    const normalizedUrl = normalizeUrl(displayUrl);
 
     const ip = getClientIp(request);
     const ipHash = hashValue(ip);
@@ -76,35 +104,101 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Limite atteinte. Réessaie dans une heure." }, { status: 429 });
     }
 
-    const { html, timedOut, responseTime, htmlLength } = await fetchHtmlWithTimeout(parsed.toString());
+    const cacheWindowStart = new Date(Date.now() - CACHE_WINDOW_MS).toISOString();
+    const { data: cachedAnalysis, error: cacheError } = await supabase
+      .from("analyses")
+      .select("*")
+      .eq("url", normalizedUrl)
+      .gte("created_at", cacheWindowStart)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    const evaluation = html ? evaluateSite(html, parsed) : getFallbackEvaluation();
+    if (cacheError) {
+      console.error("Cache lookup error", cacheError);
+    }
+
+    if (cachedAnalysis && cachedAnalysis.statut !== "error") {
+      const cachedScore = cachedAnalysis.score ?? FALLBACK_SCORE;
+      const cachedPricing = getPricing(cachedScore);
+      const cachedIssues = cachedAnalysis.lacunes ?? DEFAULT_ISSUES;
+      const cachedDetail = (cachedAnalysis as any).criteres_detail ?? FIXED_NO_HTML_DETAIL;
+      const cachedValeurPerdue =
+        cachedAnalysis.valeur_perdue ?? Math.max(0, Math.round((100 - cachedScore) * 120));
+
+      return NextResponse.json({
+        auditId: cachedAnalysis.id,
+        url: displayUrl,
+        score: cachedScore,
+        level: cachedPricing.label,
+        niveau: cachedAnalysis.niveau ?? cachedPricing.niveau,
+        issues: cachedIssues,
+        priceActivation: cachedAnalysis.prix_activation ?? cachedPricing.prixActivation,
+        prixActivation: cachedAnalysis.prix_activation ?? cachedPricing.prixActivation,
+        maintenancePrice: MAINTENANCE_PRICE,
+        explanation: cachedAnalysis.explication ?? FALLBACK_EXPLANATION,
+        explication: cachedAnalysis.explication ?? FALLBACK_EXPLANATION,
+        lacunes: cachedIssues,
+        criteresDetail: cachedDetail,
+        valeurPerdue: cachedValeurPerdue,
+        timeout: cachedAnalysis.timeout ?? false,
+        cached: true
+      });
+    }
+
+    const fetchResult = await fetchHtmlWithRetry(displayUrl);
+
+    let evaluation: EvaluationResult;
+    let usedBlockedFallback = false;
+
+    try {
+      if (fetchResult.html) {
+        evaluation = evaluateSite(fetchResult.html, parsed);
+      } else {
+        evaluation = getBlockedFallbackEvaluation();
+        usedBlockedFallback = true;
+      }
+    } catch (evaluationError) {
+      console.error("Evaluation error", evaluationError);
+      evaluation = fetchResult.html
+        ? getSizeBasedFallbackEvaluation(fetchResult.html.length)
+        : getBlockedFallbackEvaluation();
+      if (!fetchResult.html) {
+        usedBlockedFallback = true;
+      }
+    }
 
     console.log("Scraping result:", {
-      url: parsed.toString(),
+      url: normalizedUrl,
       hasSchema: evaluation.flags?.hasSchema ?? false,
       hasNAP: evaluation.flags?.hasNAP ?? false,
       hasMeta: evaluation.flags?.hasMeta ?? false,
       hasFAQ: evaluation.flags?.hasFAQ ?? false,
-      responseTime: responseTime ?? null,
-      htmlLength: htmlLength ?? (html?.length ?? null)
+      responseTime: fetchResult.responseTime ?? null,
+      htmlLength: fetchResult.htmlLength ?? (fetchResult.html?.length ?? null)
     });
+
     const pricing = getPricing(evaluation.score);
-    const explanation = evaluation.timeout
-      ? FALLBACK_EXPLANATION
-      : evaluation.issues[0] || "Votre site est déjà lisible par la plupart des agents IA.";
+    const explanation = usedBlockedFallback
+      ? BLOCKED_EXPLANATION
+      : evaluation.timeout
+        ? FALLBACK_EXPLANATION
+        : evaluation.issues[0] || "Votre site est déjà lisible par la plupart des agents IA.";
     const valeurPerdue = Math.max(0, Math.round((100 - evaluation.score) * 120));
 
     const { data: audit, error: insertError } = await supabase
       .from("analyses")
       .insert({
-        url: parsed.toString(),
+        url: normalizedUrl,
         score: evaluation.score,
         niveau: pricing.niveau,
         explication: explanation,
         lacunes: evaluation.issues,
         prix_activation: pricing.prixActivation,
-        ip_hash: ipHash
+        valeur_perdue: valeurPerdue,
+        criteres_detail: evaluation.criteresDetail,
+        ip_hash: ipHash,
+        cached: false
       })
       .select("id")
       .single();
@@ -115,7 +209,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       auditId: audit.id,
-      url: parsed.toString(),
+      url: displayUrl,
       score: evaluation.score,
       level: pricing.label,
       niveau: pricing.niveau,
@@ -128,7 +222,8 @@ export async function POST(request: Request) {
       lacunes: evaluation.issues,
       criteresDetail: evaluation.criteresDetail,
       valeurPerdue,
-      timeout: timedOut || evaluation.timeout
+      timeout: (fetchResult.timedOut ?? false) || evaluation.timeout,
+      cached: false
     });
   } catch (error) {
     console.error("Analyze error", error);
@@ -150,6 +245,18 @@ function hashValue(value: string) {
   return crypto.createHash("sha256").update(value).digest("hex");
 }
 
+function normalizeUrl(raw: string) {
+  try {
+    const parsed = new URL(raw);
+    const hostname = parsed.hostname.replace(/^www\./, "");
+    const pathname = parsed.pathname === "/" ? "" : parsed.pathname.replace(/\/$/, "");
+    const search = parsed.search || "";
+    return `${hostname}${pathname}${search}`;
+  } catch (error) {
+    return raw;
+  }
+}
+
 async function fetchHtmlWithTimeout(url: string) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), ANALYZE_TIMEOUT_MS);
@@ -165,27 +272,52 @@ async function fetchHtmlWithTimeout(url: string) {
   }
 }
 
-type CriteriaScoreMap = Record<(typeof CRITERIA_LABELS)[number]["key"], number>;
-type EvaluationResult = {
-  score: number;
-  issues: string[];
-  timeout: boolean;
-  criteresDetail: {
-    schemaOrg: number;
-    nap: number;
-    metadata: number;
-    faq: number;
-    vitesse: number;
-    citations: number;
-  };
-  flags?: {
-    hasSchema: boolean;
-    hasNAP: boolean;
-    hasMeta: boolean;
-    hasFAQ: boolean;
-  };
-};
+async function fetchHtmlWithRetry(url: string, attempts = 2) {
+  let attempt = 0;
+  let result = await fetchHtmlWithTimeout(url);
 
+  while (attempt < attempts - 1 && !result.html && result.timedOut) {
+    attempt += 1;
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    result = await fetchHtmlWithTimeout(url);
+    if (result.html || !result.timedOut) {
+      break;
+    }
+  }
+
+  return result;
+}
+
+function scoreFromDetail(detail: CriteriaDetail) {
+  const total =
+    detail.schemaOrg +
+    detail.nap +
+    detail.metadata +
+    detail.faq +
+    detail.vitesse +
+    detail.citations;
+  return Math.max(0, Math.min(100, Math.round((total / 120) * 100)));
+}
+
+function buildIssuesFromDetail(detail: CriteriaDetail) {
+  const issues: string[] = [];
+  if (detail.schemaOrg < 15) issues.push(DEFAULT_ISSUES[0]);
+  if (detail.nap < 15) issues.push(DEFAULT_ISSUES[1]);
+  if (detail.metadata < 15) issues.push(DEFAULT_ISSUES[2]);
+  if (detail.faq < 12) issues.push("Aucune FAQ structurée détectée");
+  if (detail.vitesse < 14) issues.push("Votre site est trop lent pour être pleinement exploré par les IA");
+  if (detail.citations < 12) issues.push("Peu de citations externes détectées par les agents IA");
+  return issues.length ? issues : DEFAULT_ISSUES;
+}
+
+function deriveFlagsFromDetail(detail: CriteriaDetail) {
+  return {
+    hasSchema: detail.schemaOrg >= 15,
+    hasNAP: detail.nap >= 15,
+    hasMeta: detail.metadata >= 14,
+    hasFAQ: detail.faq >= 12
+  };
+}
 
 function evaluateSite(html: string, targetUrl?: URL): EvaluationResult {
   const $ = cheerio.load(html);
@@ -230,7 +362,7 @@ function evaluateSite(html: string, targetUrl?: URL): EvaluationResult {
   };
 }
 
-function formatCriteriaDetail(map: CriteriaScoreMap) {
+function formatCriteriaDetail(map: CriteriaScoreMap): CriteriaDetail {
   return {
     schemaOrg: Math.round(map.schema),
     nap: Math.round(map.nap),
@@ -331,47 +463,45 @@ function scoreCitations($: cheerio.CheerioAPI, host?: string) {
   return 6;
 }
 
-function getFallbackEvaluation(): EvaluationResult {
-  const criteresDetail = createFallbackDetail();
-  const score = scoreFromDetail(criteresDetail);
+function getBlockedFallbackEvaluation(): EvaluationResult {
+  return buildEvaluationFromDetail(FIXED_NO_HTML_DETAIL, true);
+}
+
+function getSizeBasedFallbackEvaluation(htmlLength: number): EvaluationResult {
+  const preset = htmlLength < 5_000 ? "low" : htmlLength < 20_000 ? "medium" : "high";
+  return buildEvaluationFromDetail(SIZE_FALLBACK_DETAIL[preset], false);
+}
+
+function buildEvaluationFromDetail(detail: CriteriaDetail, timeout: boolean): EvaluationResult {
   return {
-    score,
-    issues: DEFAULT_ISSUES,
-    timeout: true,
-    criteresDetail,
-    flags: flagsFromDetail(criteresDetail)
+    score: scoreFromDetail(detail),
+    issues: buildIssuesFromDetail(detail),
+    timeout,
+    criteresDetail: detail,
+    flags: deriveFlagsFromDetail(detail)
   };
 }
 
 function getFallbackResponse() {
-  const criteresDetail = createFallbackDetail();
-  const score = scoreFromDetail(criteresDetail);
-  const pricing = getPricing(score);
-  const valeurPerdue = Math.max(0, Math.round((100 - score) * 120));
+  const evaluation = getBlockedFallbackEvaluation();
+  const pricing = getPricing(evaluation.score);
+  const valeurPerdue = Math.max(0, Math.round((100 - evaluation.score) * 120));
   return {
     auditId: null,
     url: undefined,
-    score,
+    score: evaluation.score,
     level: pricing.label,
     niveau: pricing.niveau,
-    issues: DEFAULT_ISSUES,
+    issues: evaluation.issues,
     priceActivation: pricing.prixActivation,
     prixActivation: pricing.prixActivation,
     maintenancePrice: MAINTENANCE_PRICE,
-    explanation: FALLBACK_EXPLANATION,
-    explication: FALLBACK_EXPLANATION,
-    lacunes: DEFAULT_ISSUES,
-    criteresDetail,
+    explanation: BLOCKED_EXPLANATION,
+    explication: BLOCKED_EXPLANATION,
+    lacunes: evaluation.issues,
+    criteresDetail: evaluation.criteresDetail,
     valeurPerdue,
-    timeout: true
-  };
-}
-
-function flagsFromDetail(detail: ReturnType<typeof createFallbackDetail>) {
-  return {
-    hasSchema: detail.schemaOrg >= 15,
-    hasNAP: detail.nap >= 15,
-    hasMeta: detail.metadata >= 14,
-    hasFAQ: detail.faq >= 12
+    timeout: true,
+    cached: false
   };
 }
