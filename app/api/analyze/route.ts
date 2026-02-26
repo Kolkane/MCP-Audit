@@ -25,46 +25,97 @@ const CRITERIA_LABELS = [
   { key: "citations", label: "Citations externes" }
 ] as const;
 
+const EXPECTED_SCHEMA_TYPES = ["Organization", "LocalBusiness", "Service", "WebSite", "Product", "FAQPage", "BreadcrumbList", "Person"];
+const SOCIAL_DOMAINS = ["facebook.com", "linkedin.com", "instagram.com", "twitter.com", "x.com", "youtube.com", "tiktok.com"];
+const DIRECTORY_DOMAINS = ["pagesjaunes.fr", "trustpilot.com", "google.com/maps", "g.page", "sortlist", "clutch.co", "yelp.com"];
+const CERTIFICATION_KEYWORDS = ["certifié", "certification", "label", "partenaire", "agréé"];
+const REVIEW_KEYWORDS = ["avis", "témoignage", "review", "note clients", "retour client"];
+
 const FALLBACK_EXPLANATION = "Votre site présente plusieurs lacunes critiques détectées lors de l'analyse.";
 const BLOCKED_EXPLANATION =
   "Votre site a limité l'accès lors de l'analyse. Score de précaution attribué — les lacunes détectées sont représentatives de la majorité des sites non optimisés.";
 
-const FIXED_NO_HTML_DETAIL = {
-  schemaOrg: 2,
-  nap: 8,
-  metadata: 6,
-  faq: 1,
-  vitesse: 12,
-  citations: 3
+type SchemaOrgDetail = {
+  score: number;
+  found: string[];
+  missing: string[];
 };
 
-const SIZE_FALLBACK_DETAIL = {
-  low: { schemaOrg: 4, nap: 4, metadata: 4, faq: 3, vitesse: 5, citations: 4 },
-  medium: { schemaOrg: 6, nap: 6, metadata: 6, faq: 5, vitesse: 6, citations: 7 },
-  high: { schemaOrg: 8, nap: 8, metadata: 8, faq: 6, vitesse: 9, citations: 9 }
-} as const;
+type NapDetail = {
+  score: number;
+  hasPhone: boolean;
+  hasAddress: boolean;
+  hasEmail: boolean;
+  isCoherent: boolean;
+};
 
-type CriteriaScoreMap = Record<(typeof CRITERIA_LABELS)[number]["key"], number>;
+type MetadataDetail = {
+  score: number;
+  hasTitle: boolean;
+  titleLength: number;
+  hasDescription: boolean;
+  descLength: number;
+  hasOG: boolean;
+  hasImage: boolean;
+  hasTwitterCard: boolean;
+};
+
+type FaqDetail = {
+  score: number;
+  hasStructured: boolean;
+  hasHtml: boolean;
+  questionsCount: number;
+};
+
+type SpeedDetail = {
+  score: number;
+  htmlSize: number; // KB
+  scriptsCount: number;
+  cssCount: number;
+  imagesWithoutAlt: number;
+  lazyImages: number;
+  hasViewportMeta: boolean;
+};
+
+type CitationDetail = {
+  score: number;
+  socialLinks: string[];
+  hasGMB: boolean;
+  hasReviews: boolean;
+  hasCertifications: boolean;
+  hasDirectories: boolean;
+};
+
 type CriteriaDetail = {
-  schemaOrg: number;
-  nap: number;
-  metadata: number;
-  faq: number;
-  vitesse: number;
-  citations: number;
+  schemaOrg: SchemaOrgDetail;
+  nap: NapDetail;
+  metadata: MetadataDetail;
+  faq: FaqDetail;
+  vitesse: SpeedDetail;
+  citations: CitationDetail;
 };
+
+type Correction = {
+  critere: string;
+  probleme: string;
+  solution: string;
+  impact: "critique" | "important" | "utile";
+};
+
 type EvaluationResult = {
   score: number;
   issues: string[];
   timeout: boolean;
   criteresDetail: CriteriaDetail;
-  flags?: {
-    hasSchema: boolean;
-    hasNAP: boolean;
-    hasMeta: boolean;
-    hasFAQ: boolean;
-  };
+  corrections: Correction[];
 };
+
+const FALLBACK_DETAIL_NO_HTML = createDetailFromScores({ schema: 2, nap: 8, meta: 6, faq: 1, speed: 12, citations: 3 });
+const SIZE_FALLBACK_DETAIL = {
+  low: createDetailFromScores({ schema: 4, nap: 4, meta: 4, faq: 3, speed: 5, citations: 4 }),
+  medium: createDetailFromScores({ schema: 6, nap: 6, meta: 6, faq: 5, speed: 6, citations: 7 }),
+  high: createDetailFromScores({ schema: 8, nap: 8, meta: 8, faq: 6, speed: 9, citations: 9 })
+} as const;
 
 export async function POST(request: Request) {
   try {
@@ -119,12 +170,12 @@ export async function POST(request: Request) {
     }
 
     if (cachedAnalysis && cachedAnalysis.statut !== "error") {
+      const cachedDetail = normalizeDetail((cachedAnalysis as any).criteres_detail);
       const cachedScore = cachedAnalysis.score ?? FALLBACK_SCORE;
       const cachedPricing = getPricing(cachedScore);
       const cachedIssues = cachedAnalysis.lacunes ?? DEFAULT_ISSUES;
-      const cachedDetail = (cachedAnalysis as any).criteres_detail ?? FIXED_NO_HTML_DETAIL;
-      const cachedValeurPerdue =
-        cachedAnalysis.valeur_perdue ?? Math.max(0, Math.round((100 - cachedScore) * 120));
+      const corrections = buildCorrections(cachedDetail);
+      const cachedValeurPerdue = cachedAnalysis.valeur_perdue ?? Math.max(0, Math.round((100 - cachedScore) * 120));
 
       return NextResponse.json({
         auditId: cachedAnalysis.id,
@@ -140,6 +191,7 @@ export async function POST(request: Request) {
         explication: cachedAnalysis.explication ?? FALLBACK_EXPLANATION,
         lacunes: cachedIssues,
         criteresDetail: cachedDetail,
+        corrections,
         valeurPerdue: cachedValeurPerdue,
         timeout: cachedAnalysis.timeout ?? false,
         cached: true
@@ -170,10 +222,12 @@ export async function POST(request: Request) {
 
     console.log("Scraping result:", {
       url: normalizedUrl,
-      hasSchema: evaluation.flags?.hasSchema ?? false,
-      hasNAP: evaluation.flags?.hasNAP ?? false,
-      hasMeta: evaluation.flags?.hasMeta ?? false,
-      hasFAQ: evaluation.flags?.hasFAQ ?? false,
+      schemaScore: evaluation.criteresDetail.schemaOrg.score,
+      napScore: evaluation.criteresDetail.nap.score,
+      metaScore: evaluation.criteresDetail.metadata.score,
+      faqScore: evaluation.criteresDetail.faq.score,
+      vitesseScore: evaluation.criteresDetail.vitesse.score,
+      citationsScore: evaluation.criteresDetail.citations.score,
       responseTime: fetchResult.responseTime ?? null,
       htmlLength: fetchResult.htmlLength ?? (fetchResult.html?.length ?? null)
     });
@@ -181,9 +235,7 @@ export async function POST(request: Request) {
     const pricing = getPricing(evaluation.score);
     const explanation = usedBlockedFallback
       ? BLOCKED_EXPLANATION
-      : evaluation.timeout
-        ? FALLBACK_EXPLANATION
-        : evaluation.issues[0] || "Votre site est déjà lisible par la plupart des agents IA.";
+      : evaluation.issues[0] || "Votre site est déjà lisible par la plupart des agents IA.";
     const valeurPerdue = Math.max(0, Math.round((100 - evaluation.score) * 120));
 
     const { data: audit, error: insertError } = await supabase
@@ -221,8 +273,9 @@ export async function POST(request: Request) {
       explication: explanation,
       lacunes: evaluation.issues,
       criteresDetail: evaluation.criteresDetail,
+      corrections: evaluation.corrections,
       valeurPerdue,
-      timeout: (fetchResult.timedOut ?? false) || evaluation.timeout,
+      timeout: (fetchResult.timedOut ?? false) || false,
       cached: false
     });
   } catch (error) {
@@ -288,197 +341,483 @@ async function fetchHtmlWithRetry(url: string, attempts = 2) {
   return result;
 }
 
+function evaluateSite(html: string, targetUrl?: URL): EvaluationResult {
+  const $ = cheerio.load(html);
+
+  const schemaOrg = analyzeSchema($);
+  const nap = analyzeNAP($);
+  const metadata = analyzeMetadata($);
+  const faq = analyzeFAQ($);
+  const vitesse = analyzeSpeed($, html);
+  const citations = analyzeCitations($, targetUrl?.hostname);
+
+  const detail: CriteriaDetail = {
+    schemaOrg,
+    nap,
+    metadata,
+    faq,
+    vitesse,
+    citations
+  };
+
+  const score = scoreFromDetail(detail);
+  const issues = buildIssuesFromDetail(detail);
+  const corrections = buildCorrections(detail);
+
+  return {
+    score,
+    issues,
+    timeout: false,
+    criteresDetail: detail,
+    corrections
+  };
+}
+
 function scoreFromDetail(detail: CriteriaDetail) {
   const total =
-    detail.schemaOrg +
-    detail.nap +
-    detail.metadata +
-    detail.faq +
-    detail.vitesse +
-    detail.citations;
+    detail.schemaOrg.score +
+    detail.nap.score +
+    detail.metadata.score +
+    detail.faq.score +
+    detail.vitesse.score +
+    detail.citations.score;
   return Math.max(0, Math.min(100, Math.round((total / 120) * 100)));
+}
+
+function analyzeSchema($: cheerio.CheerioAPI): SchemaOrgDetail {
+  const found = new Set<string>();
+  $('script[type="application/ld+json"]').each((_, element) => {
+    try {
+      const json = JSON.parse($(element).text());
+      const entries = Array.isArray(json) ? json : [json];
+      entries.forEach((entry) => {
+        if (entry && typeof entry === "object" && entry["@type"]) {
+          const type = `${entry["@type"]}`.replace(/^[^A-Za-z]+/, "");
+          if (type) {
+            found.add(type);
+          }
+        }
+      });
+    } catch (error) {
+      // ignore malformed json
+    }
+  });
+
+  $('[itemscope][itemtype]').each((_, element) => {
+    const type = $(element).attr("itemtype");
+    if (type) {
+      const clean = type.split("/").pop();
+      if (clean) {
+        found.add(clean);
+      }
+    }
+  });
+
+  const foundList = Array.from(found);
+  const usefulTypes = foundList.filter((type) => type.toLowerCase() !== "website");
+
+  let score = 0;
+  if (foundList.length === 0) {
+    score = 0;
+  } else if (foundList.length === 1 && foundList[0].toLowerCase() === "website") {
+    score = 5;
+  } else if (usefulTypes.length <= 2) {
+    score = 10;
+  } else if (usefulTypes.length >= 3) {
+    score = 15;
+  }
+  if (usefulTypes.length >= 3 && found.has("FAQPage")) {
+    score = 20;
+  }
+
+  const missing = EXPECTED_SCHEMA_TYPES.filter((type) => !foundList.includes(type));
+  return { score, found: foundList, missing };
+}
+
+function analyzeNAP($: cheerio.CheerioAPI): NapDetail {
+  const bodyText = $("body").text();
+  const headerText = $("header").text();
+  const footerText = $("footer").text();
+
+  const phoneRegex = /\+?[\d\s().-]{10,}/g;
+  const phoneMatches = bodyText.match(phoneRegex) || [];
+  const hasPhone = phoneMatches.length > 0;
+
+  const addressRegex = /(\b\d{2,5}\b\s*(rue|avenue|boulevard|route|road|street|chemin|place|impasse|paris|france))/i;
+  const hasAddress = addressRegex.test(bodyText);
+  const hasEmail = /[\w.-]+@[\w.-]+\.[A-Za-z]{2,}/.test(bodyText);
+
+  const headerPhone = (headerText.match(phoneRegex) || [])[0]?.replace(/\D/g, "");
+  const footerPhone = (footerText.match(phoneRegex) || [])[0]?.replace(/\D/g, "");
+  const isCoherent = Boolean(headerPhone && footerPhone && headerPhone === footerPhone);
+
+  let score = 0;
+  if (!hasPhone && !hasAddress && !hasEmail) {
+    score = 0;
+  } else if (hasEmail && !hasPhone && !hasAddress) {
+    score = 5;
+  } else if ((hasPhone && !hasAddress) || (hasAddress && !hasPhone)) {
+    score = 8;
+  } else if (hasPhone && hasAddress && !hasEmail) {
+    score = 13;
+  } else if (hasPhone && hasAddress && hasEmail && !isCoherent) {
+    score = 17;
+  } else if (hasPhone && hasAddress && hasEmail && isCoherent) {
+    score = 20;
+  }
+
+  return { score, hasPhone, hasAddress, hasEmail, isCoherent };
+}
+
+function analyzeMetadata($: cheerio.CheerioAPI): MetadataDetail {
+  const title = $("title").text().trim();
+  const metaDesc = $('meta[name="description"]').attr("content")?.trim() ?? "";
+  const ogTitle = $('meta[property="og:title"]').attr("content")?.trim();
+  const ogDesc = $('meta[property="og:description"]').attr("content")?.trim();
+  const ogImage = $('meta[property="og:image"]').attr("content")?.trim();
+  const ogUrl = $('meta[property="og:url"]').attr("content");
+  const twitterCard = $('meta[name="twitter:card"]').attr("content");
+
+  const hasTitle = Boolean(title);
+  const hasDescription = Boolean(metaDesc);
+  const hasOG = Boolean(ogTitle && ogDesc && ogUrl);
+  const hasImage = Boolean(ogImage);
+  const hasTwitterCard = Boolean(twitterCard);
+
+  const titleLength = title.length;
+  const descLength = metaDesc.length;
+  const titleOptimal = titleLength >= 30 && titleLength <= 60;
+  const descOptimal = descLength >= 100 && descLength <= 160;
+
+  let score = 0;
+  if (!hasTitle && !hasDescription) {
+    score = 0;
+  } else if (hasTitle && !hasDescription) {
+    score = 4;
+  } else if (hasTitle && hasDescription && !ogTitle) {
+    score = 8;
+  } else if (hasTitle && hasDescription && ogTitle && !ogDesc) {
+    score = 12;
+  } else if (hasTitle && hasDescription && hasOG && hasImage) {
+    score = 16;
+  }
+  if (hasTitle && hasDescription && hasOG && hasImage && titleOptimal && descOptimal && hasTwitterCard) {
+    score = 20;
+  }
+
+  return { score, hasTitle, titleLength, hasDescription, descLength, hasOG, hasImage, hasTwitterCard };
+}
+
+function analyzeFAQ($: cheerio.CheerioAPI): FaqDetail {
+  let structuredCount = 0;
+  $('script[type="application/ld+json"]').each((_, element) => {
+    try {
+      const json = JSON.parse($(element).text());
+      const entries = Array.isArray(json) ? json : [json];
+      entries.forEach((entry) => {
+        if (entry && entry["@type"] === "FAQPage" && Array.isArray(entry.mainEntity)) {
+          structuredCount += entry.mainEntity.length;
+        }
+      });
+    } catch (error) {
+      // ignore
+    }
+  });
+
+  const htmlFaqBlocks = $('[class*="faq"], #faq, .faq');
+  const microdataFaq = $('[itemscope][itemtype*="FAQPage"]');
+  const accordionFaq = htmlFaqBlocks.find("details").length;
+
+  const hasStructured = structuredCount > 0;
+  const hasHtml = htmlFaqBlocks.length > 0 || accordionFaq > 0 || microdataFaq.length > 0;
+  const questionsCount = Math.max(structuredCount, accordionFaq, htmlFaqBlocks.find("h3, h4").length);
+
+  let score = 0;
+  if (!hasStructured && !hasHtml) {
+    score = 0;
+  } else if (hasHtml && !microdataFaq.length && !hasStructured) {
+    score = 5;
+  } else if (microdataFaq.length > 0 && !hasStructured) {
+    score = 10;
+  } else if (hasStructured && structuredCount < 5) {
+    score = 15;
+  } else if (hasStructured && structuredCount >= 5) {
+    score = 20;
+  }
+
+  return { score, hasStructured, hasHtml, questionsCount };
+}
+
+function analyzeSpeed($: cheerio.CheerioAPI, html: string): SpeedDetail {
+  const htmlSize = Math.round(html.length / 1024);
+  const scriptsCount = $('script[src]').length;
+  const cssCount = $('link[rel="stylesheet"]').length;
+  const images = $('img');
+  const imagesWithoutAlt = images.filter((_, img) => !$(img).attr("alt") || $(img).attr("alt")?.trim() === "").length;
+  const lazyImages = $('img[loading="lazy"]').length;
+  const hasViewportMeta = Boolean($('meta[name="viewport"]').length);
+
+  let score = 12;
+  if (htmlSize > 500 || scriptsCount >= 15) {
+    score = 5;
+  } else if (htmlSize > 200 || scriptsCount >= 10) {
+    score = 10;
+  } else if (htmlSize < 200 && scriptsCount < 10) {
+    score = 15;
+  }
+  if (htmlSize < 100 && scriptsCount < 5 && imagesWithoutAlt === 0) {
+    score = 20;
+  }
+
+  return { score, htmlSize, scriptsCount, cssCount, imagesWithoutAlt, lazyImages, hasViewportMeta };
+}
+
+function analyzeCitations($: cheerio.CheerioAPI, host?: string): CitationDetail {
+  const socialLinks = new Set<string>();
+  let hasGMB = false;
+  let hasDirectories = false;
+
+  $('a[href]').each((_, element) => {
+    const href = $(element).attr("href");
+    if (!href) return;
+    try {
+      const url = new URL(href, "https://example.com");
+      const domain = url.hostname.replace(/^www\./, "");
+      if (SOCIAL_DOMAINS.some((social) => domain.endsWith(social))) {
+        socialLinks.add(domain.split(".").slice(-2).join("."));
+      }
+      if (href.includes("google.com/maps") || href.includes("g.page")) {
+        hasGMB = true;
+      }
+      if (DIRECTORY_DOMAINS.some((dir) => href.includes(dir))) {
+        hasDirectories = true;
+      }
+    } catch (error) {
+      // ignore invalid URLs
+    }
+  });
+
+  const bodyText = $('body').text().toLowerCase();
+  const hasCertifications = CERTIFICATION_KEYWORDS.some((keyword) => bodyText.includes(keyword));
+  const hasReviews = REVIEW_KEYWORDS.some((keyword) => bodyText.includes(keyword));
+
+  let score = 0;
+  if (socialLinks.size === 0 && !hasGMB && !hasReviews) {
+    score = 0;
+  } else if (socialLinks.size > 0 && socialLinks.size <= 2) {
+    score = 5;
+  } else if (socialLinks.size >= 2 && hasGMB) {
+    score = 10;
+  } else if (socialLinks.size >= 2 && hasGMB && hasReviews) {
+    score = 13;
+  } else if (socialLinks.size >= 2 && hasGMB && hasReviews && (hasDirectories || hasCertifications)) {
+    score = hasCertifications ? 20 : 17;
+  }
+
+  return {
+    score,
+    socialLinks: Array.from(socialLinks),
+    hasGMB,
+    hasReviews,
+    hasCertifications,
+    hasDirectories
+  };
 }
 
 function buildIssuesFromDetail(detail: CriteriaDetail) {
   const issues: string[] = [];
-  if (detail.schemaOrg < 15) issues.push(DEFAULT_ISSUES[0]);
-  if (detail.nap < 15) issues.push(DEFAULT_ISSUES[1]);
-  if (detail.metadata < 15) issues.push(DEFAULT_ISSUES[2]);
-  if (detail.faq < 12) issues.push("Aucune FAQ structurée détectée");
-  if (detail.vitesse < 14) issues.push("Votre site est trop lent pour être pleinement exploré par les IA");
-  if (detail.citations < 12) issues.push("Peu de citations externes détectées par les agents IA");
+  if (detail.schemaOrg.score < 15) issues.push("Vos données schema.org sont absentes ou incomplètes");
+  if (detail.nap.score < 17) issues.push("Vos coordonnées (NAP) sont illisibles par les agents IA");
+  if (detail.metadata.score < 16) issues.push("Vos métadonnées ne sont pas optimisées pour ChatGPT");
+  if (detail.faq.score < 15) issues.push("Aucune FAQ structurée détectée");
+  if (detail.vitesse.score < 15) issues.push("Votre site est trop lourd pour être pleinement exploré par les IA");
+  if (detail.citations.score < 15) issues.push("Peu de signaux d'autorité externes détectés");
   return issues.length ? issues : DEFAULT_ISSUES;
 }
 
-function deriveFlagsFromDetail(detail: CriteriaDetail) {
+function buildCorrections(detail: CriteriaDetail): Correction[] {
+  const corrections: Correction[] = [];
+
+  if (detail.schemaOrg.score < 10) {
+    corrections.push({
+      critere: "Schema.org",
+      probleme: "Aucune donnée structurée détectée sur votre site",
+      solution: "Ajout du code JSON-LD Organization, Service, FAQPage et BreadcrumbList",
+      impact: "critique"
+    });
+  }
+
+  if (!detail.nap.hasPhone || !detail.nap.hasAddress) {
+    corrections.push({
+      critere: "Données NAP",
+      probleme: "Coordonnées incomplètes pour les IA",
+      solution: "Structuration des coordonnées en schema.org LocalBusiness + harmonisation header/footer",
+      impact: "critique"
+    });
+  } else if (!detail.nap.isCoherent) {
+    corrections.push({
+      critere: "Données NAP",
+      probleme: "Numéros différents entre header et footer",
+      solution: "Uniformiser les coordonnées et les exposer dans un bloc LocalBusiness",
+      impact: "important"
+    });
+  }
+
+  if (detail.metadata.score < 16) {
+    corrections.push({
+      critere: "Métadonnées",
+      probleme: "Balises title/description/OG incomplètes",
+      solution: "Réécriture des metas + ajout og:image, twitter card et formats optimisés",
+      impact: "important"
+    });
+  }
+
+  if (detail.faq.score < 15) {
+    corrections.push({
+      critere: "FAQ",
+      probleme: "FAQ non structurée pour les agents IA",
+      solution: "Création d'une FAQPage JSON-LD avec 5 questions prioritaires",
+      impact: "important"
+    });
+  }
+
+  if (detail.vitesse.score < 15) {
+    corrections.push({
+      critere: "Vitesse & accessibilité",
+      probleme: "Page lourde et peu optimisée",
+      solution: "Allégement des scripts, compression HTML et ajout des attributs alt/lazy-loading",
+      impact: "important"
+    });
+  }
+
+  if (detail.citations.score < 15) {
+    corrections.push({
+      critere: "Autorité",
+      probleme: "Aucun signal externe détecté",
+      solution: "Ajout des liens vers réseaux sociaux, Google Business Profile et pages d'avis",
+      impact: "utile"
+    });
+  }
+
+  return corrections.slice(0, 4);
+}
+
+function createDetailFromScores(scores: { schema: number; nap: number; meta: number; faq: number; speed: number; citations: number }): CriteriaDetail {
   return {
-    hasSchema: detail.schemaOrg >= 15,
-    hasNAP: detail.nap >= 15,
-    hasMeta: detail.metadata >= 14,
-    hasFAQ: detail.faq >= 12
+    schemaOrg: { score: scores.schema, found: [], missing: EXPECTED_SCHEMA_TYPES },
+    nap: { score: scores.nap, hasPhone: false, hasAddress: false, hasEmail: false, isCoherent: false },
+    metadata: {
+      score: scores.meta,
+      hasTitle: false,
+      titleLength: 0,
+      hasDescription: false,
+      descLength: 0,
+      hasOG: false,
+      hasImage: false,
+      hasTwitterCard: false
+    },
+    faq: { score: scores.faq, hasStructured: false, hasHtml: false, questionsCount: 0 },
+    vitesse: {
+      score: scores.speed,
+      htmlSize: 0,
+      scriptsCount: 0,
+      cssCount: 0,
+      imagesWithoutAlt: 0,
+      lazyImages: 0,
+      hasViewportMeta: false
+    },
+    citations: {
+      score: scores.citations,
+      socialLinks: [],
+      hasGMB: false,
+      hasReviews: false,
+      hasCertifications: false,
+      hasDirectories: false
+    }
   };
 }
 
-function evaluateSite(html: string, targetUrl?: URL): EvaluationResult {
-  const $ = cheerio.load(html);
-  const resourceCount = $("script[src], link[href], img[src]").length;
-
-  const schema = assessSchema($);
-  const nap = assessNAP($);
-  const metadata = assessMetadata($);
-  const faq = assessFAQ($);
-  const speedScore = scoreSpeed(html.length, resourceCount);
-  const citationsScore = scoreCitations($, targetUrl?.hostname);
-
-  const criteria: CriteriaScoreMap = {
-    schema: schema.score,
-    nap: nap.score,
-    meta: metadata.score,
-    faq: faq.score,
-    speed: speedScore,
-    citations: citationsScore
-  };
-
-  const rawScore = Object.values(criteria).reduce((sum, value) => sum + value, 0);
-  const normalizedScore = Math.max(0, Math.min(100, Math.round((rawScore / 120) * 100)));
-
-  const issues: string[] = [];
-  if (criteria.schema < 15) issues.push(DEFAULT_ISSUES[0]);
-  if (criteria.nap < 15) issues.push(DEFAULT_ISSUES[1]);
-  if (criteria.meta < 15) issues.push(DEFAULT_ISSUES[2]);
-  if (criteria.faq < 15) issues.push("Aucune FAQ structurée détectée");
-
+function normalizeDetail(raw: any): CriteriaDetail {
+  if (!raw) return FALLBACK_DETAIL_NO_HTML;
+  if (typeof raw.schemaOrg === "number") {
+    return createDetailFromScores({
+      schema: raw.schemaOrg ?? 0,
+      nap: raw.nap ?? 0,
+      meta: raw.metadata ?? 0,
+      faq: raw.faq ?? 0,
+      speed: raw.vitesse ?? 0,
+      citations: raw.citations ?? 0
+    });
+  }
   return {
-    score: normalizedScore,
-    issues: issues.length ? issues : DEFAULT_ISSUES,
-    timeout: false,
-    criteresDetail: formatCriteriaDetail(criteria),
-    flags: {
-      hasSchema: schema.hasSchema,
-      hasNAP: nap.hasNAP,
-      hasMeta: metadata.hasMeta,
-      hasFAQ: faq.hasFAQ
+    schemaOrg: {
+      score: raw.schemaOrg?.score ?? 0,
+      found: raw.schemaOrg?.found ?? [],
+      missing: raw.schemaOrg?.missing ?? EXPECTED_SCHEMA_TYPES
+    },
+    nap: {
+      score: raw.nap?.score ?? 0,
+      hasPhone: raw.nap?.hasPhone ?? false,
+      hasAddress: raw.nap?.hasAddress ?? false,
+      hasEmail: raw.nap?.hasEmail ?? false,
+      isCoherent: raw.nap?.isCoherent ?? false
+    },
+    metadata: {
+      score: raw.metadata?.score ?? 0,
+      hasTitle: raw.metadata?.hasTitle ?? false,
+      titleLength: raw.metadata?.titleLength ?? 0,
+      hasDescription: raw.metadata?.hasDescription ?? false,
+      descLength: raw.metadata?.descLength ?? 0,
+      hasOG: raw.metadata?.hasOG ?? false,
+      hasImage: raw.metadata?.hasImage ?? false,
+      hasTwitterCard: raw.metadata?.hasTwitterCard ?? false
+    },
+    faq: {
+      score: raw.faq?.score ?? 0,
+      hasStructured: raw.faq?.hasStructured ?? false,
+      hasHtml: raw.faq?.hasHtml ?? false,
+      questionsCount: raw.faq?.questionsCount ?? 0
+    },
+    vitesse: {
+      score: raw.vitesse?.score ?? 0,
+      htmlSize: raw.vitesse?.htmlSize ?? 0,
+      scriptsCount: raw.vitesse?.scriptsCount ?? 0,
+      cssCount: raw.vitesse?.cssCount ?? 0,
+      imagesWithoutAlt: raw.vitesse?.imagesWithoutAlt ?? 0,
+      lazyImages: raw.vitesse?.lazyImages ?? 0,
+      hasViewportMeta: raw.vitesse?.hasViewportMeta ?? false
+    },
+    citations: {
+      score: raw.citations?.score ?? 0,
+      socialLinks: raw.citations?.socialLinks ?? [],
+      hasGMB: raw.citations?.hasGMB ?? false,
+      hasReviews: raw.citations?.hasReviews ?? false,
+      hasCertifications: raw.citations?.hasCertifications ?? false,
+      hasDirectories: raw.citations?.hasDirectories ?? false
     }
   };
-}
-
-function formatCriteriaDetail(map: CriteriaScoreMap): CriteriaDetail {
-  return {
-    schemaOrg: Math.round(map.schema),
-    nap: Math.round(map.nap),
-    metadata: Math.round(map.meta),
-    faq: Math.round(map.faq),
-    vitesse: Math.round(map.speed),
-    citations: Math.round(map.citations)
-  };
-}
-
-function assessSchema($: cheerio.CheerioAPI) {
-  const hasSchema = detectSchema($);
-  return { score: hasSchema ? 20 : 6, hasSchema };
-}
-
-function detectSchema($: cheerio.CheerioAPI) {
-  const scripts = $('script[type="application/ld+json"]').toArray();
-  return scripts.some((script) => {
-    try {
-      const json = JSON.parse($(script).text());
-      const entries = Array.isArray(json) ? json : [json];
-      return entries.some((entry) => {
-        if (!entry || typeof entry !== "object") return false;
-        const type = `${entry["@type"] || ""}`.toLowerCase();
-        return Boolean(type) && (type.includes("organization") || type.includes("localbusiness") || type.includes("service"));
-      });
-    } catch (error) {
-      return false;
-    }
-  });
-}
-
-function assessNAP($: cheerio.CheerioAPI) {
-  const text = $("body").text();
-  const hasPhone = /\+?\d[\d\s().-]{6,}/.test(text);
-  const hasAddress = /(rue|avenue|boulevard|road|street|route|chemin|place|impasse|paris|france|bp\s*\d+)/i.test(text);
-  const hasNAP = hasPhone && hasAddress;
-  const score = hasNAP ? 20 : hasPhone || hasAddress ? 12 : 6;
-  return { score, hasNAP };
-}
-
-function assessMetadata($: cheerio.CheerioAPI) {
-  const title = $("title").text().trim();
-  const metaDesc = $('meta[name="description"]').attr("content")?.trim();
-  const ogTitle = $('meta[property="og:title"]').attr("content")?.trim();
-  const ogDesc = $('meta[property="og:description"]').attr("content")?.trim();
-  const ogImage = $('meta[property="og:image"]').attr("content")?.trim();
-  const filled = [title, metaDesc, ogTitle, ogDesc, ogImage].filter(Boolean).length;
-  let score = 4;
-  if (filled === 5) score = 20;
-  else if (filled >= 4) score = 16;
-  else if (filled >= 3) score = 12;
-  else if (filled >= 2) score = 8;
-  else if (filled >= 1) score = 6;
-  return { score, hasMeta: filled >= 4 };
-}
-
-function assessFAQ($: cheerio.CheerioAPI) {
-  const scripts = $('script[type="application/ld+json"]').toArray();
-  const hasFAQ = scripts.some((script) => {
-    try {
-      const json = JSON.parse($(script).text());
-      const entries = Array.isArray(json) ? json : [json];
-      return entries.some((entry) => entry && entry["@type"] === "FAQPage");
-    } catch (error) {
-      return false;
-    }
-  });
-  return { score: hasFAQ ? 20 : 8, hasFAQ };
-}
-
-function scoreSpeed(htmlLength: number, resourceCount: number) {
-  if (htmlLength < 200_000 && resourceCount < 80) return 18;
-  if (htmlLength < 350_000 && resourceCount < 120) return 16;
-  if (htmlLength < 500_000) return 12;
-  if (htmlLength < 700_000) return 10;
-  return 8;
-}
-
-function scoreCitations($: cheerio.CheerioAPI, host?: string) {
-  const links = $('a[href^="http"]').toArray();
-  let externalCount = 0;
-  links.forEach((link) => {
-    const href = $(link).attr("href");
-    if (!href) return;
-    try {
-      const linkUrl = new URL(href);
-      if (!host || linkUrl.hostname !== host) {
-        externalCount += 1;
-      }
-    } catch (error) {
-      externalCount += 1;
-    }
-  });
-  if (externalCount >= 20) return 18;
-  if (externalCount >= 10) return 14;
-  if (externalCount >= 4) return 10;
-  return 6;
 }
 
 function getBlockedFallbackEvaluation(): EvaluationResult {
-  return buildEvaluationFromDetail(FIXED_NO_HTML_DETAIL, true);
+  const detail = FALLBACK_DETAIL_NO_HTML;
+  return {
+    score: scoreFromDetail(detail),
+    issues: buildIssuesFromDetail(detail),
+    timeout: true,
+    criteresDetail: detail,
+    corrections: buildCorrections(detail)
+  };
 }
 
 function getSizeBasedFallbackEvaluation(htmlLength: number): EvaluationResult {
   const preset = htmlLength < 5_000 ? "low" : htmlLength < 20_000 ? "medium" : "high";
-  return buildEvaluationFromDetail(SIZE_FALLBACK_DETAIL[preset], false);
-}
-
-function buildEvaluationFromDetail(detail: CriteriaDetail, timeout: boolean): EvaluationResult {
+  const detail = SIZE_FALLBACK_DETAIL[preset];
   return {
     score: scoreFromDetail(detail),
     issues: buildIssuesFromDetail(detail),
-    timeout,
+    timeout: false,
     criteresDetail: detail,
-    flags: deriveFlagsFromDetail(detail)
+    corrections: buildCorrections(detail)
   };
 }
 
@@ -500,6 +839,7 @@ function getFallbackResponse() {
     explication: BLOCKED_EXPLANATION,
     lacunes: evaluation.issues,
     criteresDetail: evaluation.criteresDetail,
+    corrections: evaluation.corrections,
     valeurPerdue,
     timeout: true,
     cached: false

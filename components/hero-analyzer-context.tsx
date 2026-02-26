@@ -13,15 +13,61 @@ export type AnalyzeResponse = {
   niveau?: string;
   explanation?: string;
   criteresDetail?: {
-    schemaOrg: number;
-    nap: number;
-    metadata: number;
-    faq: number;
-    vitesse: number;
-    citations: number;
+    schemaOrg: {
+      score: number;
+      found: string[];
+      missing: string[];
+    };
+    nap: {
+      score: number;
+      hasPhone: boolean;
+      hasAddress: boolean;
+      hasEmail: boolean;
+      isCoherent: boolean;
+    };
+    metadata: {
+      score: number;
+      hasTitle: boolean;
+      titleLength: number;
+      hasDescription: boolean;
+      descLength: number;
+      hasOG: boolean;
+      hasImage: boolean;
+      hasTwitterCard: boolean;
+    };
+    faq: {
+      score: number;
+      hasStructured: boolean;
+      hasHtml: boolean;
+      questionsCount: number;
+    };
+    vitesse: {
+      score: number;
+      htmlSize: number;
+      scriptsCount: number;
+      cssCount: number;
+      imagesWithoutAlt: number;
+      lazyImages: number;
+      hasViewportMeta: boolean;
+    };
+    citations: {
+      score: number;
+      socialLinks: string[];
+      hasGMB: boolean;
+      hasReviews: boolean;
+      hasCertifications: boolean;
+      hasDirectories: boolean;
+    };
   };
+  corrections?: Array<{
+    critere: string;
+    probleme: string;
+    solution: string;
+    impact: "critique" | "important" | "utile";
+  }>;
   valeurPerdue?: number;
   timeout?: boolean;
+  cached?: boolean;
 };
 
 type AnalysisState = "idle" | "loading" | "done";
