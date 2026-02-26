@@ -107,27 +107,27 @@ const testimonials = [
 const faq = [
   {
     question: "C'est vraiment gratuit l'audit ?",
-    answer: "Oui. Score Agent-Readiness + rapport PDF détaillé. Aucun moyen de paiement demandé."
+    answer: "Oui, entièrement. Vous obtenez votre score Agent-Readiness /100 avec le détail des 6 critères analysés. Aucun moyen de paiement demandé."
   },
   {
-    question: "Combien de temps prend l'audit ?",
-    answer: "24h chrono. Notre agent te livre le rapport directement par email pro."
+    question: "Qu'est-ce que le MCP et pourquoi c'est important ?",
+    answer: "Le MCP (Model Context Protocol) est le standard qui permet aux agents IA comme ChatGPT ou Perplexity d'interroger directement votre site pour en comprendre le contenu. Sans endpoint MCP, votre site est une boîte noire pour les IA — elles ne peuvent pas vous recommander."
   },
   {
-    question: "Que contient le rapport ?",
-    answer: "Score détaillé, lacunes techniques, estimation business perdu et plan d'action."
+    question: "Que contient la mise en conformité ?",
+    answer: "Nous générons pour vous : un endpoint MCP actif, le code schema.org complet, un fichier llms.txt optimisé et vos métadonnées corrigées. Vous recevez tout par email avec les instructions d'implémentation pas à pas. Score garanti >80/100 sous 48h."
   },
   {
-    question: "Comment fonctionne la mise en conformité automatique ?",
-    answer: "Nos agents IA génèrent et testent un endpoint MCP + métadonnées optimisées pour les agents."
+    question: "Comment fonctionne la maintenance ?",
+    answer: "Les algorithmes des IA évoluent chaque mois. Notre agent repasse automatiquement sur votre site le 1er de chaque mois, recalcule votre score et applique les mises à jour nécessaires. Vous recevez un rapport mensuel avec l'évolution de votre score."
   },
   {
-    question: "Sous quel délai mon score s'améliore ?",
-    answer: "48h après paiement de l'activation. Tu reçois le rapport final avec la nouvelle note garantie >80/100."
+    question: "Sous quel délai mon score s'améliore-t-il ?",
+    answer: "48h après le paiement de l'activation. Vous recevez un email de livraison avec tous vos livrables et votre nouveau score garanti >80/100."
   },
   {
     question: "Ça fonctionne pour mon secteur ?",
-    answer: "Si tu as un site, oui. Nous couvrons freelances, agences, PME, e-commerce, artisans et professions libérales."
+    answer: "Oui — si vous avez un site web, Agentable fonctionne pour vous. Nous couvrons les freelances, agences, PME-TPE, artisans, professions libérales et e-commerces. Le score et le prix sont calculés selon votre site, pas votre secteur."
   }
 ];
 
