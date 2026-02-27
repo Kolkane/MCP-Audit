@@ -167,9 +167,9 @@ export function ResultReport({ result, checkoutLoading, onCheckout }: ResultRepo
   };
 
   return (
-    <div className="mx-auto mt-10 flex w-full max-w-5xl flex-col gap-6 px-4 sm:px-0">
+    <div className="mx-auto mt-8 flex w-full max-w-5xl flex-col gap-6 px-6">
       {/* Bloc 1 */}
-      <motion.section {...motionBase(0)} className="rounded-3xl border border-white/5 bg-[#0F172A] p-10 text-white">
+      <motion.section {...motionBase(0)} className="overflow-hidden rounded-3xl border border-white/5 bg-[#0F172A] p-6 sm:p-10 text-white">
         <div className="grid gap-10 lg:grid-cols-[1.6fr_1fr_1fr]">
           <div>
             <div className="mb-6 flex items-center gap-2 text-xs font-medium uppercase tracking-[0.3em] text-white/30">
@@ -178,7 +178,7 @@ export function ResultReport({ result, checkoutLoading, onCheckout }: ResultRepo
               <span className="font-mono text-white/40 max-w-xs truncate">{result.url ?? "URL analysée"}</span>
             </div>
             <div className="flex items-end gap-3">
-              <span className={clsx("text-[120px] leading-none font-black tracking-tighter", severityColor)}>{animatedScore}</span>
+              <span className={clsx("text-6xl sm:text-7xl leading-none font-black tracking-tighter", severityColor)}>{animatedScore}</span>
               <span className="mb-6 text-3xl text-white/15">/100</span>
             </div>
             <div className="mt-2 flex items-center gap-3">
@@ -382,7 +382,7 @@ export function ResultReport({ result, checkoutLoading, onCheckout }: ResultRepo
         {corrections.length === 0 ? (
           <p className="text-sm text-slate-500">Aucune correction spécifique requise sur cet audit.</p>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {corrections.map((correction, index) => {
               const palette = correction.impact === "critique"
                 ? { card: "border-red-100 bg-red-50/50", badge: "bg-red-100 text-red-700", number: "bg-red-100 text-red-600", label: "🔴 Critique" }
@@ -553,7 +553,10 @@ function buildCriterionLines(
     case "schemaOrg": {
       const schema = detail as CriteriaDetails["schemaOrg"];
       if (schema.found?.length) {
-        lines.push({ text: `✓ Trouvé : ${schema.found.join(", ")}`, type: "positive" });
+        const displayFound = schema.found.slice(0, 3);
+        const extraFound = schema.found.length - displayFound.length;
+        const suffixFound = extraFound > 0 ? ` + ${extraFound} autres` : "";
+        lines.push({ text: `✓ Trouvé : ${displayFound.join(", ")}${suffixFound}`, type: "positive" });
       } else {
         lines.push({ text: "✗ Aucun type Schema.org détecté", type: "negative" });
       }
