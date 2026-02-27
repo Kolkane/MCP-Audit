@@ -121,6 +121,7 @@ export async function POST(request: Request) {
   try {
     const { url } = await request.json();
 
+    console.log("URL reçue:", url);
     if (!url || typeof url !== "string" || !/^https?:\/\//i.test(url)) {
       return NextResponse.json({ error: "URL invalide" }, { status: 400 });
     }
@@ -134,6 +135,7 @@ export async function POST(request: Request) {
 
     const displayUrl = parsed.toString();
     const normalizedUrl = normalizeUrl(displayUrl);
+    console.log("URL normalisée:", normalizedUrl);
 
     const ip = getClientIp(request);
     const ipHash = hashValue(ip);

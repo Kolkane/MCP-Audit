@@ -45,6 +45,7 @@ export function ResultReport({ result, checkoutLoading, onCheckout }: ResultRepo
   }, [result.auditId]);
 
   const criteresDetail = result.criteresDetail;
+
   const monthlyLoss = result.valeurPerdue ?? Math.max(0, Math.round((100 - result.score) * 120));
   const yearlyLoss = monthlyLoss * 12;
   const formattedMonthlyLoss = useMemo(() => new Intl.NumberFormat("fr-FR").format(monthlyLoss), [monthlyLoss]);
@@ -55,7 +56,9 @@ export function ResultReport({ result, checkoutLoading, onCheckout }: ResultRepo
   const formattedTotalToday = useMemo(() => new Intl.NumberFormat("fr-FR").format(totalToday), [totalToday]);
   const formattedActivation = useMemo(() => new Intl.NumberFormat("fr-FR").format(result.priceActivation), [result.priceActivation]);
 
-  const failingCriteria = Object.entries(criteresDetail ?? {}).filter(([key, value]) => key in CRITERIA_META && value.score < 10).length;
+  const failingCriteria = Object.entries(criteresDetail ?? {})
+    .filter(([key, value]) => key in CRITERIA_META && value.score < 10).length;
+
   const priority = failingCriteria >= 4 || monthlyLoss > 2500 ? "Critique" : failingCriteria >= 2 ? "Modérée" : "Faible";
   const priorityColor = priority === "Critique" ? "text-red-500" : priority === "Modérée" ? "text-orange-500" : "text-emerald-500";
 
@@ -71,8 +74,8 @@ export function ResultReport({ result, checkoutLoading, onCheckout }: ResultRepo
     return fallbacks.join(" · ");
   }, [result.explanation, result.issues]);
 
-  const criteres = Object.entries(CRITERIA_META).map(([key, meta]) => {
-    const detail = criteresDetail?.[key as keyof CriteriaDetails];
+  const criteres = (Object.entries(CRITERIA_META) as [keyof CriteriaDetails, (typeof CRITERIA_META)[keyof typeof CRITERIA_META]][]).map(([key, meta]) => {
+    const detail = criteresDetail?.[key];
     const score = detail?.score ?? 10;
     const status = score < 9 ? "✗ Action requise" : score < 14 ? "⚠ À améliorer" : "✓ Correct";
     const statusColor = score < 9 ? "bg-red-50 text-red-600" : score < 14 ? "bg-orange-50 text-orange-600" : "bg-emerald-50 text-emerald-600";
@@ -86,157 +89,204 @@ export function ResultReport({ result, checkoutLoading, onCheckout }: ResultRepo
       statusColor,
       iconTone,
       progress: Math.min(100, (score / 20) * 100),
-      lines: buildLines(key as keyof CriteriaDetails, detail)
+      lines: buildLines(key, detail)
     };
   });
 
   const corrections = result.corrections ?? [];
-  const includedItems = [
-    "Schema.org JSON-LD généré",
-    "Fichier llms.txt optimisé",
-    "Métadonnées corrigées",
-    "Rapport PDF complet"
-  ];
-
-  const conversionCopy = corrections.filter((c) => c.impact === "critique").length >= 3
-    ? "Restructuration technique complète requise."
-    : corrections.filter((c) => c.impact === "critique").length >= 1
-    ? "Optimisations ciblées sur vos points critiques."
-    : "Quelques ajustements techniques suffisent.";
-
+  const includedItems = ["Schema.org JSON-LD généré", "Fichier llms.txt optimisé", "Métadonnées corrigées", "Rapport PDF complet"];
   const guarantees = ["Paiement sécurisé Stripe", "Facture HT disponible", "Remboursement si non livré"];
 
   return (
-    <div className="mx-auto mt-8 flex w-full max-w-5xl flex-col gap-6 px-6">
-      <motion.section {...blockMotion(0)} className="overflow-hidden rounded-3xl border border-white/10 bg-[#0F172A] p-6 text-white">
-        <div className="flex flex-col gap-6 lg:flex-row">
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-white/50">
-              <span className="uppercase tracking-[0.3em]">Audit GEO</span>
-              <span className="font-mono max-w-[200px] truncate text-white/70">{result.url ?? "URL analysée"}</span>
-            </div>
-            <div className="mt-4 flex items-end gap-3">
-              <span className={clsx("text-6xl sm:text-7xl font-black leading-none", result.score > 60 ? "text-emerald-400" : result.score >= 40 ? "text-orange-400" : "text-red-400")}>{animatedScore}</span>
-              <span className="mb-4 text-2xl text-white/30">/100</span>
-            </div>
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm font-semibold">
-              <span className={clsx("rounded-full border px-4 py-1.5", result.score > 60 ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" : result.score >= 40 ? "border-orange-500/30 bg-orange-500/10 text-orange-300" : "border-red-500/30 bg-red-500/10 text-red-300")}>{result.score > 60 ? "Bien structuré" : result.score >= 40 ? "À optimiser" : "Score critique"}</span>
-              <span className={clsx("text-xs", priorityColor)}>Priorité : {priority}</span>
-              <span className="text-xs text-white/40">Critères KO : {failingCriteria}/6</span>
-            </div>
-            <p className="mt-4 text-sm leading-relaxed text-white/60">{explanation}</p>
+    <div className="mx-auto mt-6 flex w-full max-w-4xl flex-col gap-6 px-6">
+      {/* Bloc 1 */}
+      <motion.section {...blockMotion(0)} className="flex flex-col gap-6 overflow-hidden rounded-3xl border border-white/10 bg-[#0F172A] p-6 text-white md:flex-row">
+        <div className="flex-1 space-y-4">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-white/50">
+            <span className="uppercase tracking-[0.3em]">Audit GEO</span>
+            <span className="font-mono max-w-[220px] truncate text-white/70">{result.url ?? "URL analysée"}</span>
           </div>
-          <div className="grid flex-shrink-0 grid-cols-2 gap-3 text-center text-sm">
-            <Stat label="Score" value={`${result.score}/100`} />
-            <Stat label="Perte estimée" value={`-${formattedMonthlyLoss}€/mois`} tone="red" />
-            <Stat label="Niveau" value={result.level ?? "N/A"} tone="indigo" />
-            <Stat label="Perte annuelle" value={`-${formattedYearlyLoss}€`} tone="red" />
+          <p className={clsx("text-5xl font-black leading-none", result.score > 60 ? "text-emerald-400" : result.score >= 40 ? "text-orange-400" : "text-red-400")}>{animatedScore}</p>
+          <div className="flex flex-wrap items-center gap-3 text-sm font-semibold">
+            <span className={clsx("rounded-full border px-3 py-1", result.score > 60 ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" : result.score >= 40 ? "border-orange-500/30 bg-orange-500/10 text-orange-300" : "border-red-500/30 bg-red-500/10 text-red-300")}>{result.score > 60 ? "Bien structuré" : result.score >= 40 ? "À optimiser" : "Score critique"}</span>
+            <span className={clsx("text-xs", priorityColor)}>{priority}</span>
+            <span className="text-xs text-white/50">Critères KO : {failingCriteria}/6</span>
           </div>
-          <div className="hidden w-[140px] overflow-hidden md:flex flex-col items-center justify-center">
-            <svg width="140" height="140" viewBox="0 0 140 140">
-              <circle cx="70" cy="70" r="55" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="12" />
-              <circle
-                cx="70"
-                cy="70"
-                r="55"
-                fill="none"
-                stroke={result.score > 60 ? "#4ADE80" : result.score >= 40 ? "#FB923C" : "#F87171"}
-                strokeWidth="12"
-                strokeLinecap="round"
-                strokeDasharray={345.6}
-                strokeDashoffset={345.6 - (345.6 * Math.min(100, Math.max(0, result.score))) / 100}
-                transform="rotate(-90 70 70)"
-              />
-            </svg>
+          <p className="text-sm text-white/65 leading-relaxed">{explanation}</p>
+        </div>
+        <div className="relative flex w-full flex-shrink-0 flex-col gap-3 overflow-hidden rounded-2xl border border-white/15 bg-white/5 p-4 sm:w-64">
+          <div className="space-y-2 text-sm text-white/70">
+            <p className="flex items-center justify-between"><span>Score</span><span>{result.score}/100</span></p>
+            <p className="flex items-center justify-between"><span>Perte</span><span>-{formattedMonthlyLoss}€/mois</span></p>
+            <p className="flex items-center justify-between"><span>Priorité</span><span className={clsx("font-semibold", priorityColor)}>{priority}</span></p>
+          </div>
+          <div className="absolute inset-y-0 right-0 hidden h-full w-24 rounded-l-full bg-white/10 md:block" />
+        </div>
+      </motion.section>
+
+      {/* Bloc 2 */}
+      <motion.section {...blockMotion(0.12)} className="space-y-4">
+        <div className="rounded-3xl border border-slate-100 bg-white p-6">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+            <span className="uppercase tracking-[0.3em]">Analyse par critère</span>
+            <span>Lecture complète du site</span>
+          </div>
+          <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+            {criteres.map((criterion, index) => (
+              <div key={criterion.key} className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className={clsx("flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg", criterion.iconTone)}>
+                      <criterion.meta.icon className="h-4 w-4" />
+                    </div>
+                    <span className="text-sm font-semibold text-slate-900">{criterion.meta.label}</span>
+                  </div>
+                  <span className={clsx("text-sm font-semibold", criterion.score < 9 ? "text-red-500" : criterion.score < 14 ? "text-orange-500" : "text-emerald-500")}>{criterion.score}/20</span>
+                </div>
+                <div className="mt-3 h-2 rounded-full bg-slate-200">
+                  <motion.div
+                    className={clsx("h-full rounded-full", criterion.score < 9 ? "bg-gradient-to-r from-red-400 to-red-500" : criterion.score < 14 ? "bg-gradient-to-r from-orange-400 to-orange-500" : "bg-gradient-to-r from-emerald-400 to-emerald-500")}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${criterion.progress}%` }}
+                    transition={{ duration: 0.8, delay: index * 0.08 }}
+                  />
+                </div>
+                <div className="mt-3 space-y-1 text-xs text-slate-600">
+                  {criterion.lines.slice(0, 3).map((line, lineIndex) => (
+                    <p key={lineIndex} className={clsx(line.type === "positive" ? "text-emerald-600" : line.type === "negative" ? "text-red-500" : "text-slate-500")}>{line.text}</p>
+                  ))}
+                </div>
+                <span className={clsx("mt-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold", criterion.statusColor)}>{criterion.status}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="rounded-3xl border border-red-950/30 bg-red-950 p-6 text-white">
+          <div className="flex flex-wrap items-center justify-between gap-6">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-red-200/80">Coût immédiat</p>
+              <p className="mt-2 text-3xl font-black text-red-200">-{formattedMonthlyLoss}€ / mois</p>
+              <p className="text-sm text-white/60">Chaque mois sans optimisation</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-white/60">Sur 12 mois</p>
+              <p className="text-2xl font-black text-white">-{formattedYearlyLoss}€</p>
+            </div>
           </div>
         </div>
       </motion.section>
 
-      <motion.section {...blockMotion(0.12)} className="rounded-3xl border border-slate-100 bg-white p-6">
-        <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Analyse par critère</p>
-            <p className="text-sm text-slate-500">Lecture complète du site</p>
-          </div>
-          <span className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-sm font-semibold text-slate-600">{result.score}/100</span>
+      {/* Bloc 3 */}
+      <motion.section {...blockMotion(0.24)} className="rounded-3xl border border-slate-100 bg-white p-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {corrections.length === 0 ? (
+            <p className="text-sm text-slate-600">Aucune correction spécifique requise.</p>
+          ) : (
+            corrections.map((correction, index) => (
+              <div key={index} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <p className="text-sm font-semibold text-slate-900">{correction.probleme}</p>
+                <p className="mt-1 text-xs text-slate-600 leading-relaxed">{correction.solution}</p>
+                <span className={clsx("mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold",
+                  correction.impact === "critique" ? "bg-red-100 text-red-600" : correction.impact === "important" ? "bg-orange-100 text-orange-600" : "bg-blue-100 text-blue-600")}> {correction.impact === "critique" ? "🔴 Critique" : correction.impact === "important" ? "🟠 Important" : "🔵 Utile"}</span>
+              </div>
+            ))
+          )}
         </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {criteres.map((criterion, index) => (
-            <div key={criterion.key} className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-3">
-                  <div className={clsx("flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl", criterion.iconTone)}>
-                    <criterion.meta.icon className="h-4 w-4" />
-                  </div>
-                  <span className="text-sm font-semibold text-slate-900">{criterion.meta.label}</span>
-                </div>
-                <span className={clsx("text-sm font-semibold", criterion.score < 9 ? "text-red-500" : criterion.score < 14 ? "text-orange-500" : "text-emerald-500")}>{criterion.score}/20</span>
+      </motion.section>
+
+      {/* Bloc 4 */}
+      <motion.section {...blockMotion(0.36)} className="space-y-4 rounded-3xl border border-white/10 bg-[#0F172A] p-6 text-white">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/40">Votre mise en conformité GEO</p>
+            <div className="mt-2 flex items-baseline gap-2">
+              <p className="text-5xl font-black text-white">{formattedActivation}€</p>
+              <span className="text-xl text-white/30">HT</span>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-white/80">
+            {includedItems.map((item) => (
+              <div key={item} className="flex items-center gap-2 rounded-full border border-white/20 px-3 py-1">
+                <Check className="h-3 w-3 text-indigo-200" />
+                {item}
               </div>
-              <div className="mt-3 h-2 rounded-full bg-slate-200">
-                <motion.div
-                  className={clsx("h-2 rounded-full", criterion.score < 9 ? "bg-gradient-to-r from-red-400 to-red-500" : criterion.score < 14 ? "bg-gradient-to-r from-orange-400 to-orange-500" : "bg-gradient-to-r from-emerald-400 to-emerald-500")}
-                  initial={{ width: 0 }}
-                  animate={{ width: `${criterion.progress}%` }}
-                  transition={{ duration: 0.8, delay: index * 0.08 }}
-                />
-              </div>
-              <div className="mt-3 space-y-1 text-xs text-slate-600">
-                {criterion.lines.map((line, lineIndex) => (
-                  <p key={lineIndex} className={clsx(line.type === "positive" ? "text-emerald-600" : line.type === "negative" ? "text-red-500" : "text-slate-500")}>{line.text}</p>
-                ))}
-              </div>
-              <span className={clsx("mt-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold", criterion.statusColor)}>{criterion.status}</span>
+            ))}
+          </div>
+        </div>
+        <label className="flex items-start gap-3 rounded-2xl border border-white/20 bg-white/5 p-4 text-sm text-white/80">
+          <input
+            type="checkbox"
+            checked={addMaintenance}
+            onChange={(event) => setAddMaintenance(event.target.checked)}
+            className="mt-1 h-5 w-5 flex-shrink-0 accent-indigo-400"
+          />
+          <div>
+            <p className="font-semibold text-white">Maintenance mensuelle</p>
+            <p className="text-xs text-white/60">+79€ HT/mois · sans engagement</p>
+          </div>
+        </label>
+        <div className="flex flex-col gap-3 text-sm text-white/80 sm:flex-row sm:items-center sm:justify-between">
+          <p>Total aujourd'hui : <span className="text-xl font-semibold text-white">{formattedTotalToday}€ HT</span></p>
+          {addMaintenance && <p className="text-xs text-white/60">+ 79€/mois</p>}
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={() => onCheckout(addMaintenance)}
+            className="w-full rounded-2xl bg-indigo-500 px-6 py-4 text-base font-bold text-white shadow-[0_0_40px_rgba(99,102,241,0.4)] transition hover:bg-indigo-400"
+          >
+            Démarrer maintenant →
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowEmailForm((prev) => !prev)}
+            className="w-full rounded-2xl border border-white/15 bg-white/5 px-6 py-4 text-sm font-semibold text-white/80 transition hover:bg-white/10"
+          >
+            Recevoir ce rapport par email →
+          </button>
+        </div>
+        <AnimatePresence initial={false}>
+          {showEmailForm && (
+            <motion.form
+              key="email-form"
+              onSubmit={handleSendEmail}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-2 overflow-hidden"
+            >
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="votre@email.fr"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 focus:border-white/40"
+              />
+              <button
+                type="submit"
+                className="w-full rounded-xl bg-indigo-500/80 px-4 py-2.5 text-sm font-semibold text-white"
+              >
+                {emailStatus === "loading" ? "Envoi..." : "Envoyer le rapport →"}
+              </button>
+              {emailStatus === "success" && <p className="text-center text-xs text-white/70">✓ Rapport envoyé !</p>}
+              {emailStatus === "error" && <p className="text-center text-xs text-red-300">Erreur lors de l'envoi.</p>}
+            </motion.form>
+          )}
+        </AnimatePresence>
+        <div className="space-y-2 text-xs text-white/40">
+          {guarantees.map((item) => (
+            <div key={item} className="flex items-center gap-2">
+              <span>•</span>
+              {item}
             </div>
           ))}
         </div>
       </motion.section>
+    </div>
+  );
+}
 
-      <motion.section {...blockMotion(0.24)} className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-3xl border border-red-900/40 bg-red-950 p-6 text-white">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-red-300/80">Coût immédiat</p>
-          <p className="mt-4 text-4xl font-black">-{formattedMonthlyLoss}€</p>
-          <p className="text-sm text-white/60">Chaque mois sans optimisation</p>
-          <div className="my-6 border-t border-white/10" />
-          <div className="flex items-center justify-between text-sm text-white/70">
-            <span>Sur 12 mois</span>
-            <span className="text-2xl font-black text-white">-{formattedYearlyLoss}€</span>
-          </div>
-        </div>
-        <div className="rounded-3xl border border-slate-100 bg-white p-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-slate-900">Ce qu'on va corriger</h3>
-            <span className="text-sm text-slate-500">Livraison sous 48h</span>
-          </div>
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-            {corrections.length === 0 ? (
-              <p className="text-sm text-slate-500">Aucune correction spécifique requise.</p>
-            ) : (
-              corrections.map((correction, index) => {
-                const palette = correction.impact === "critique"
-                  ? { card: "border-red-100 bg-red-50", badge: "bg-red-100 text-red-700", number: "bg-red-100 text-red-600", label: "🔴 Critique" }
-                  : correction.impact === "important"
-                  ? { card: "border-orange-100 bg-orange-50", badge: "bg-orange-100 text-orange-700", number: "bg-orange-100 text-orange-600", label: "🟠 Important" }
-                  : { card: "border-blue-100 bg-blue-50", badge: "bg-blue-100 text-blue-700", number: "bg-blue-100 text-blue-600", label: "🔵 Utile" };
-                return (
-                  <div key={index} className={clsx("flex items-start gap-4 rounded-2xl border p-4", palette.card)}>
-                    <div className={clsx("flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-sm font-black", palette.number)}>
-                      {(index + 1).toString().padStart(2, "0")}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-900">{correction.probleme}</p>
-                      <p className="mt-1 text-xs text-slate-600 leading-relaxed">{correction.solution}</p>
-                      <span className={clsx("mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold", palette.badge)}>
-                        {palette.label}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-      </motion.section>
-
-      <motion.section {...blockMotion(0.36)} className="relative grid gap-8 rounded-3xl border border-white/5 bg-[#0F172A] p-6 sm:grid-cols-3 sm:p-10 overflow-hidden">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-[radial-gradient(circle,_rgba(79,70,229,0.2),_transparent_70%)] blur-3xl" />
-        <diventesque";"
+function Statistics({ label, value, tone }: { label: string; value: string; tone?: "red" | "indigo" }) {
+  return (
+    <div className={clsx("rounded-2xl border px-4 py-3 text-left", tone === "red" ? "border-red-500/30 bg-red-500/10" : tone === "indigo" ? "border-indigo-500/30 bg-indigo-500/10" : "border-white/10 bg-white/5")}>

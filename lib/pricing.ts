@@ -2,9 +2,9 @@ export const MAINTENANCE_PRICE = 79;
 export const MAINTENANCE_ENV_KEY = "STRIPE_PRICE_MAINTENANCE";
 
 export const PRICE_LEVELS = [
-  { threshold: 60, label: "Site bien structuré", price: 249, color: "green", niveau: "simple" },
-  { threshold: 40, label: "Optimisations modérées", price: 390, color: "orange", niveau: "moyen" },
-  { threshold: -Infinity, label: "Refonte complète", price: 590, color: "red", niveau: "complexe" }
+  { threshold: 60, label: "Site bien structuré", price: 349, color: "green", niveau: "simple" },
+  { threshold: 40, label: "Optimisations modérées", price: 490, color: "orange", niveau: "moyen" },
+  { threshold: -Infinity, label: "Refonte complète", price: 690, color: "red", niveau: "complexe" }
 ];
 
 export type PricingInfo = {
@@ -19,7 +19,7 @@ export function getPricing(score: number): PricingInfo {
     return {
       niveau: "simple",
       label: "Site bien structuré",
-      prixActivation: 249,
+      prixActivation: 349,
       stripeEnvKey: "STRIPE_PRICE_SIMPLE"
     };
   }
@@ -27,14 +27,14 @@ export function getPricing(score: number): PricingInfo {
     return {
       niveau: "moyen",
       label: "Optimisations modérées",
-      prixActivation: 390,
+      prixActivation: 490,
       stripeEnvKey: "STRIPE_PRICE_MEDIUM"
     };
   }
   return {
     niveau: "complexe",
     label: "Refonte complète",
-    prixActivation: 590,
+    prixActivation: 690,
     stripeEnvKey: "STRIPE_PRICE_COMPLEX"
   };
 }
