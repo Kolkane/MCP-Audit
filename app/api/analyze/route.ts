@@ -121,9 +121,9 @@ export async function POST(request: Request) {
   try {
     const { url } = await request.json();
 
-    console.log('URL reçue:', url);
-
+    console.log("1. URL reçue:", url);
     if (!url || typeof url !== "string" || !/^https?:\/\//i.test(url)) {
+      console.log("5. Scores:", cachedDetail);
       return NextResponse.json({ error: "URL invalide" }, { status: 400 });
     }
 
@@ -136,7 +136,7 @@ export async function POST(request: Request) {
 
     const displayUrl = parsed.toString();
     const normalizedUrl = normalizeUrl(displayUrl);
-    console.log('URL normalisée:', normalizedUrl);
+    console.log("2. URL normalisée:", normalizedUrl);
 
     const ip = getClientIp(request);
     const ipHash = hashValue(ip);
@@ -162,7 +162,6 @@ export async function POST(request: Request) {
     const { data: cachedAnalysis, error: cacheError } = await supabase
       .from("analyses")
       .select("*")
-    console.log('Cache hit:', !!cachedAnalysis && cachedAnalysis.statut !== 'error');
       .eq("url", normalizedUrl)
       .gte("created_at", cacheWindowStart)
       .order("created_at", { ascending: false })
@@ -174,6 +173,7 @@ export async function POST(request: Request) {
     }
 
     const cacheHit = Boolean(cachedAnalysis && cachedAnalysis.statut !== "error");
+    console.log("3. Cache hit:", cacheHit);
     if (cachedAnalysis && cachedAnalysis.statut !== "error") {
       const cachedDetail = normalizeDetail((cachedAnalysis as any).criteres_detail);
       const cachedScore = cachedAnalysis.score ?? FALLBACK_SCORE;
@@ -204,7 +204,7 @@ export async function POST(request: Request) {
     }
 
     const fetchResult = await fetchHtmlWithRetry(displayUrl);
-    console.log('HTML length:', fetchResult.html?.length ?? 0);
+    console.log("4. HTML length:", fetchResult.html?.length ?? 0);
 
     let evaluation: EvaluationResult;
     let usedBlockedFallback = false;
@@ -253,7 +253,7 @@ export async function POST(request: Request) {
       throw insertError || new Error("Audit insertion failed");
     }
 
-    console.log('Scores:', evaluation.criteresDetail);
+    console.log("5. Scores:", evaluation.criteresDetail);
     return NextResponse.json({
       auditId: audit.id,
       url: displayUrl,
