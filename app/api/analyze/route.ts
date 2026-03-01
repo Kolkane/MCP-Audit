@@ -123,7 +123,7 @@ export async function POST(request: Request) {
 
     console.log("1. URL reçue:", url);
     if (!url || typeof url !== "string" || !/^https?:\/\//i.test(url)) {
-      console.log("5. Scores:", cachedDetail);
+      console.log("5. URL valide, analyse en cours");
       return NextResponse.json({ error: "URL invalide" }, { status: 400 });
     }
 
