@@ -183,26 +183,28 @@ function HeroSection() {
         backgroundColor: "#F8FAFF"
       }}
     >
-      <div className="mx-auto max-w-4xl px-6 py-36 text-center sm:py-36">
+      <div className="px-6 py-36 text-center sm:py-36">
         <FadeIn>
-          <span className="mx-auto inline-flex items-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-4 py-2 text-xs font-medium text-[#64748B]">
-            🇫🇷 Service 100% français · Lancé en 2025
-          </span>
-          <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-black leading-tight text-[#0F172A] sm:text-6xl sm:leading-[1.05]">
-            Votre site existe sur Google. Mais existe-t-il pour <span className="text-indigo-600">ChatGPT, Perplexity</span> et les agents IA ?
-          </h1>
-          <p className="mx-auto mt-5 max-w-lg text-xl leading-relaxed text-[#64748B]">
-            Entrez votre URL — notre agent analyse votre visibilité IA en 60 secondes, gratuitement.
-          </p>
-          <p className="mx-auto mt-2 max-w-lg text-center text-xs text-[#94A3B8]">
-            Le GEO (Generative Engine Optimization) est le référencement de la nouvelle génération — optimiser son site non plus pour Google, mais pour les intelligences artificielles.
-          </p>
-          <div className="mx-auto mt-10 max-w-lg">
-            <div className="flex flex-col gap-3">
+          <div className="mx-auto max-w-4xl">
+            <span className="mx-auto inline-flex items-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-4 py-2 text-xs font-medium text-[#64748B]">
+              🇫🇷 Service 100% français · Lancé en 2025
+            </span>
+            <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-black leading-tight text-[#0F172A] sm:text-6xl sm:leading-[1.05]">
+              Votre site existe sur Google. Mais existe-t-il pour <span className="text-indigo-600">ChatGPT, Perplexity</span> et les agents IA ?
+            </h1>
+            <p className="mx-auto mt-5 max-w-lg text-xl leading-relaxed text-[#64748B]">
+              Entrez votre URL — notre agent analyse votre visibilité IA en 60 secondes, gratuitement.
+            </p>
+            <p className="mx-auto mt-2 max-w-lg text-center text-xs text-[#94A3B8]">
+              Le GEO (Generative Engine Optimization) est le référencement de la nouvelle génération — optimiser son site non plus pour Google, mais pour les intelligences artificielles.
+            </p>
+          </div>
+          <div className="mx-auto mt-10 w-full max-w-6xl">
+            <div className="mx-auto flex flex-col gap-3 max-w-lg">
               <HeroAnalyzer simpleOnly />
             </div>
           </div>
-          <div className="mt-5 flex flex-col gap-2 text-sm text-[#64748B] sm:flex-row sm:items-center sm:justify-center sm:gap-6">
+          <div className="mx-auto mt-5 flex flex-col gap-2 text-sm text-[#64748B] sm:flex-row sm:items-center sm:justify-center sm:gap-6">
             <div className="flex items-center justify-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-green-500" />
               Score moyen PME FR : 23/100

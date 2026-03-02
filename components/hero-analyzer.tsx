@@ -164,7 +164,7 @@ export function HeroAnalyzer({ simpleOnly = false }: { simpleOnly?: boolean } = 
       )}
 
       {analysisState === "done" && result && (
-        <div className="mt-8 w-full max-w-6xl"><ResultReport result={result} checkoutLoading={checkoutLoading} onCheckout={handleCheckout} /></div>
+        <div className="w-full max-w-6xl mx-auto px-4 md:px-8"><ResultReport result={result} checkoutLoading={checkoutLoading} onCheckout={handleCheckout} /></div>
       )}
     </div>
   );
