@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 
 import { MAINTENANCE_PRICE } from "@/lib/pricing";
 import { useHeroAnalyzer } from "@/components/hero-analyzer-context";
-import { ResultReport } from "@/components/result-report";
+import ResultReport from "@/components/result-report";
 
 const HERO_BADGES = [
   { label: "🟢 23/100 score moyen PME FR" },
